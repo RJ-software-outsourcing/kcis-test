@@ -106,4 +106,4 @@ src/components/quiz/         reusable question components (shared by future exam
 
 ## Status
 - [x] Spec
-- [ ] Pages implemented
+- [x] Pages implemented (9 sections, 185 items)

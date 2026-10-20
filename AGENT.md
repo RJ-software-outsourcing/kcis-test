@@ -12,6 +12,7 @@ Generate exam-prep questions from everyday study material (`test-raw-material/`)
 Vite + React 19 + TypeScript + Tailwind CSS v4 + TanStack Router (file-based routing).
 
 ## Commands
+- Preview in the Claude app: `.claude/launch.json` defines `dev` (port 5173).
 - `npm run dev` — local dev (the URL includes the base: `http://localhost:5173/kcis-test/`)
 - `npm run build` — `vite build` (also generates `src/routeTree.gen.ts`) → `tsc -b` → copy `index.html` to `404.html`
 - Note: type-checking depends on `routeTree.gen.ts`, so the build runs vite first, then tsc.
@@ -24,13 +25,20 @@ src/
     __root.tsx
     index.tsx           "/" lists all exams (reads src/exams/*/meta.ts)
     <slug>.tsx          One route per exam, loads src/exams/<slug>/ExamPage
+  components/quiz/      Reusable exam UI — use it for every exam
+    types.ts            Item types (choice / match / write / predict) + defineSection()
+    QuizExam.tsx        Section grid + part-by-part section view
+    questions.tsx       Question renderers
+    HandwritingPad.tsx  Canvas for Apple Pencil / finger writing (palm rejection)
+    progress.ts         Per-exam results in localStorage
   exams/
     types.ts            ExamMeta type
     index.ts            Collects all meta via import.meta.glob
     <slug>/
       meta.ts           slug / title / description
       ExamPage.tsx      The exam page
-      README.md         Rules specific to this exam
+      README.md         Spec + rules specific to this exam
+      data/             Question banks, one file per section (plain data via defineSection)
 test-raw-material/<slug>/   Source material for that exam (read-only input)
 ```
 `src/routeTree.gen.ts` is auto-generated. Commit it, never edit it by hand.
@@ -42,12 +50,22 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 4. The `/` list picks it up automatically from `meta.ts`; no extra registration
 5. Read the exam's README.md before starting work
 
+## Building an exam's content
+1. Read every image in `test-raw-material/<slug>/` (HEIC: convert with `sips -s format jpeg -Z 1600` into the scratchpad first).
+2. Write the spec in `src/exams/<slug>/README.md` (scope, sections, question types) and commit it **before** implementing.
+3. Implement the question banks in `src/exams/<slug>/data/` using the shared `components/quiz` types; the exam page just passes sections to `<QuizExam>`.
+4. Section/part navigation uses search params (`?section=<id>&part=<n>`) defined by `validateSearch` in the route file.
+
 ## Rules
 - **Dynamic loading**: every exam page must be its own chunk; `/` may only load `meta.ts` files.
 - **Per-exam rules** go in `src/exams/<slug>/README.md`; only project-wide rules go in this file.
 - **Source material** (`test-raw-material/`) is read-only: don't modify it, and don't expose its existing answers on the website.
 - **Language**: UI, questions, and docs are all in English.
-- **Styling**: Tailwind utility classes only.
+- **Styling**: Tailwind utility classes only. Font is Andika (designed for beginning readers).
+- **Target device**: iPad (portrait and landscape). Touch targets ≥ 48 px, text ≥ 20 px.
+- **Grade level**: questions must match the source workbook's difficulty (KCIS Grade 1 so far) and stay inside the test guide's scope.
+- **Item ids** come from position (`section/part/index`), so reordering items resets saved progress for them. That's fine.
+- **React effects**: always use a block body (`useEffect(() => { f() }, …)`). Concise arrows that return a value crash with "destroy is not a function".
 
 ## Deployment
 - GitHub Pages, base path `/kcis-test/` (`base` in `vite.config.ts`).

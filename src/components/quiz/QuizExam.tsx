@@ -1,0 +1,214 @@
+import { Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import { clearPads } from './HandwritingPad'
+import { ExamIdContext, useProgress } from './progress'
+import { Question } from './questions'
+import type { Section } from './types'
+import { Btn } from './util'
+
+export interface QuizExamProps {
+  examId: string
+  title: string
+  intro?: ReactNode
+  sections: Section[]
+  sectionId?: string
+  part?: number
+  onNavigate: (sectionId?: string, part?: number) => void
+}
+
+/** Generic exam UI: a grid of section cards, and a section view showing one part at a time. */
+export function QuizExam(props: QuizExamProps) {
+  return (
+    <ExamIdContext.Provider value={props.examId}>
+      <Inner {...props} />
+    </ExamIdContext.Provider>
+  )
+}
+
+function Inner({ title, intro, sections, sectionId, part = 0, onNavigate }: QuizExamProps) {
+  const idx = sections.findIndex((s) => s.id === sectionId)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [sectionId, part])
+  if (idx < 0) return <Landing title={title} intro={intro} sections={sections} onNavigate={onNavigate} />
+  return (
+    <SectionView
+      section={sections[idx]}
+      next={sections[idx + 1]}
+      part={Math.min(Math.max(part, 0), sections[idx].parts.length - 1)}
+      onNavigate={onNavigate}
+    />
+  )
+}
+
+function useStats(prefix: string, ids: string[]) {
+  const { progress } = useProgress()
+  const answered = ids.filter((id) => progress[id]).length
+  const good = ids.filter((id) => progress[id] === 'correct' || progress[id] === 'done').length
+  return { answered, good, total: ids.length, prefix }
+}
+
+const itemIds = (s: Section) => s.parts.flatMap((p) => p.items.map((i) => i.id))
+
+function Landing({
+  title,
+  intro,
+  sections,
+  onNavigate,
+}: Pick<QuizExamProps, 'title' | 'intro' | 'sections' | 'onNavigate'>) {
+  const { clear } = useProgress()
+  return (
+    <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+      <Link to="/" className="text-lg text-indigo-700">
+        ← All exams
+      </Link>
+      <h1 className="mt-2 text-4xl font-bold">{title}</h1>
+      {intro && <div className="mt-3 text-xl text-slate-700">{intro}</div>}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {sections.map((s) => (
+          <SectionCard key={s.id} section={s} onOpen={() => onNavigate(s.id, 0)} />
+        ))}
+      </div>
+      <div className="mt-8">
+        <Btn
+          onClick={() => {
+            if (confirm('Clear all answers for this exam?')) {
+              clear('')
+              clearPads('')
+            }
+          }}
+        >
+          🗑️ Reset all progress
+        </Btn>
+      </div>
+    </main>
+  )
+}
+
+function SectionCard({ section, onOpen }: { section: Section; onOpen: () => void }) {
+  const { answered, good, total } = useStats(section.id, itemIds(section))
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex flex-col rounded-2xl border-2 border-slate-200 bg-white p-5 text-left shadow-sm active:border-indigo-400"
+    >
+      <span className="text-5xl">{section.emoji}</span>
+      <span className="mt-2 text-2xl font-bold">{section.title}</span>
+      <span className="text-lg text-slate-600">{section.subtitle}</span>
+      <span className="mt-3 h-3 w-full overflow-hidden rounded-full bg-slate-100">
+        <span
+          className="block h-full bg-emerald-500"
+          style={{ width: `${(good / total) * 100}%` }}
+        />
+      </span>
+      <span className="mt-1 text-base text-slate-500">
+        {good} / {total} correct{answered > good && ` · ${answered - good} to try again`}
+      </span>
+    </button>
+  )
+}
+
+function SectionView({
+  section,
+  next,
+  part,
+  onNavigate,
+}: {
+  section: Section
+  next?: Section
+  part: number
+  onNavigate: QuizExamProps['onNavigate']
+}) {
+  const { clear } = useProgress()
+  const [resetKey, setResetKey] = useState(0)
+  const { good, total } = useStats(section.id, itemIds(section))
+  const p = section.parts[part]
+  const isLast = part === section.parts.length - 1
+  const Aside = p.aside
+  // With an aside (e.g. a map) on wide screens, items share the page with it: one column.
+  const cols = Aside
+    ? { 1: '', 2: 'md:grid-cols-2 lg:grid-cols-1', 3: 'md:grid-cols-2 lg:grid-cols-1' }[p.columns ?? 1]
+    : { 1: '', 2: 'md:grid-cols-2', 3: 'md:grid-cols-2 lg:grid-cols-3' }[p.columns ?? 1]
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <header className="sticky top-0 z-10 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="flex items-center gap-3">
+          <Btn onClick={() => onNavigate()}>← Sections</Btn>
+          <h1 className="flex-1 truncate text-2xl font-bold">
+            {section.emoji} {section.title}
+          </h1>
+          <span className="text-lg text-slate-600">
+            {good}/{total}
+          </span>
+        </div>
+        <nav className="mt-3 flex gap-2 overflow-x-auto">
+          {section.parts.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onNavigate(section.id, i)}
+              className={`min-h-11 min-w-11 rounded-full border-2 px-3 text-lg font-semibold ${
+                i === part
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-slate-300 bg-white'
+              }`}
+            >
+              Part {i + 1}
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <h2 className="mt-5 text-2xl font-semibold text-indigo-900">
+        <span className="mr-2 rounded-lg bg-indigo-100 px-2 py-1 text-lg">Directions</span>
+        {p.title}
+      </h2>
+      <div className={Aside ? 'lg:grid lg:grid-cols-2 lg:items-start lg:gap-6' : ''}>
+        {Aside && (
+          <div className="mt-4 lg:sticky lg:top-32">
+            <Aside />
+          </div>
+        )}
+        <div key={`${p.id}:${resetKey}`} className={`mt-6 grid gap-7 ${cols}`}>
+          {p.items.map((item, i) => (
+            <Question key={item.id} item={item} number={i + 1} />
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        {part > 0 && <Btn onClick={() => onNavigate(section.id, part - 1)}>← Part {part}</Btn>}
+        <span className="flex-1" />
+        <Btn
+          onClick={() => {
+            if (confirm('Clear your answers in this part?')) {
+              clear(`${p.id}/`)
+              clearPads(`${p.id}/`)
+              setResetKey((k) => k + 1)
+            }
+          }}
+        >
+          🗑️ Reset part
+        </Btn>
+        {!isLast && (
+          <Btn tone="primary" onClick={() => onNavigate(section.id, part + 1)}>
+            Part {part + 2} →
+          </Btn>
+        )}
+        {isLast && next && (
+          <Btn tone="primary" onClick={() => onNavigate(next.id, 0)}>
+            Next: {next.title} →
+          </Btn>
+        )}
+        {isLast && !next && (
+          <Btn tone="primary" onClick={() => onNavigate()}>
+            🎉 Back to sections
+          </Btn>
+        )}
+      </div>
+    </main>
+  )
+}
