@@ -13,7 +13,7 @@ import { meta } from './meta'
 const sections = [shortU, letters, qu, words, vocab1, vocab2, reading, map, predictions]
 
 export default function ExamPage() {
-  const { section, part } = useSearch({ from: '/formative-test-3' })
+  const { mode, section, part } = useSearch({ from: '/formative-test-3' })
   const navigate = useNavigate({ from: '/formative-test-3' })
   return (
     <QuizExam
@@ -31,9 +31,18 @@ export default function ExamPage() {
         </>
       }
       sections={sections}
+      mode={mode ?? 'workbook'}
       sectionId={section}
       part={part}
-      onNavigate={(s, p) => navigate({ search: s ? { section: s, part: p || undefined } : {} })}
+      onNavigate={(n) =>
+        navigate({
+          search: {
+            mode: n.mode === 'extra' ? 'extra' : undefined,
+            section: n.section,
+            part: n.part || undefined,
+          },
+        })
+      }
     />
   )
 }

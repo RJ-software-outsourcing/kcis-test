@@ -54,7 +54,7 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 1. Read every image in `test-raw-material/<slug>/` (HEIC: convert with `sips -s format jpeg -Z 1600` into the scratchpad first).
 2. Write the spec in `src/exams/<slug>/README.md` (scope, sections, question types) and commit it **before** implementing.
 3. Implement the question banks in `src/exams/<slug>/data/` using the shared `components/quiz` types; the exam page just passes sections to `<QuizExam>`.
-4. Section/part navigation uses search params (`?section=<id>&part=<n>`) defined by `validateSearch` in the route file.
+4. Navigation uses search params (`?mode=extra&section=<id>&part=<n>`) defined by `validateSearch` in the route file. `QuizExam` splits parts into two modes: workbook (parts with `source`, the default landing) and extra practice (`mode=extra`, parts without `source`).
 
 ## Rules
 - **Dynamic loading**: every exam page must be its own chunk; `/` may only load `meta.ts` files.

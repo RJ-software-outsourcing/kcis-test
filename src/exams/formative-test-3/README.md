@@ -51,6 +51,10 @@ KCIS Grade 1. Short sentences (≤ 12 words), CVC words, vocabulary from the lis
 
 Note: Phonics p.20 lists **three** where the guide lists **there**; both are included.
 
+## Two modes
+- **📘 Workbook review** (default, `/formative-test-3`): only the workbook parts (130 items). Do these first.
+- **✨ Extra practice** (`?mode=extra`): only the new questions, reached by the Extra practice button at the bottom of the landing page or after the last workbook part.
+
 ## Sections (one screen each; each section is split into parts)
 Landing page = grid of section cards showing progress. Inside a section, one **part** (one set of directions) at a time, with Prev/Next.
 

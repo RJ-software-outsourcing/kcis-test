@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { clearPads } from './HandwritingPad'
 import { ExamIdContext, useProgress } from './progress'
@@ -7,15 +7,35 @@ import { Question } from './questions'
 import type { Section } from './types'
 import { Btn } from './util'
 
+/**
+ * Parts with a `source` (workbook questions) form the default "workbook" mode;
+ * parts without one are shown separately under "extra" practice.
+ */
+export type Mode = 'workbook' | 'extra'
+
+export interface ExamNav {
+  mode?: Mode
+  section?: string
+  part?: number
+}
+
 export interface QuizExamProps {
   examId: string
   title: string
   intro?: ReactNode
   sections: Section[]
+  mode?: Mode
   sectionId?: string
   part?: number
-  onNavigate: (sectionId?: string, part?: number) => void
+  onNavigate: (nav: ExamNav) => void
 }
+
+type Nav = (section?: string, part?: number) => void
+
+const filterMode = (sections: Section[], mode: Mode): Section[] =>
+  sections
+    .map((s) => ({ ...s, parts: s.parts.filter((p) => (mode === 'workbook') === !!p.source) }))
+    .filter((s) => s.parts.length > 0)
 
 /** Generic exam UI: a grid of section cards, and a section view showing one part at a time. */
 export function QuizExam(props: QuizExamProps) {
@@ -26,19 +46,42 @@ export function QuizExam(props: QuizExamProps) {
   )
 }
 
-function Inner({ title, intro, sections, sectionId, part = 0, onNavigate }: QuizExamProps) {
-  const idx = sections.findIndex((s) => s.id === sectionId)
+function Inner({
+  title,
+  intro,
+  sections,
+  mode = 'workbook',
+  sectionId,
+  part = 0,
+  onNavigate,
+}: QuizExamProps) {
+  const workbook = useMemo(() => filterMode(sections, 'workbook'), [sections])
+  const extra = useMemo(() => filterMode(sections, 'extra'), [sections])
+  const list = mode === 'extra' ? extra : workbook
+  const idx = list.findIndex((s) => s.id === sectionId)
+  const nav: Nav = (section, p) => onNavigate({ mode, section, part: p })
   useEffect(() => {
     window.scrollTo(0, 0)
-  }, [sectionId, part])
+  }, [mode, sectionId, part])
   if (idx < 0)
-    return <Landing title={title} intro={intro} sections={sections} onNavigate={onNavigate} />
+    return (
+      <Landing
+        title={title}
+        intro={intro}
+        mode={mode}
+        sections={list}
+        workbook={workbook}
+        onNavigate={onNavigate}
+      />
+    )
   return (
     <SectionView
-      section={sections[idx]}
-      next={sections[idx + 1]}
-      part={Math.min(Math.max(part, 0), sections[idx].parts.length - 1)}
-      onNavigate={onNavigate}
+      section={list[idx]}
+      next={list[idx + 1]}
+      part={Math.min(Math.max(part, 0), list[idx].parts.length - 1)}
+      onNavigate={nav}
+      onFinish={() => onNavigate(mode === 'workbook' ? { mode: 'extra' } : { mode })}
+      finishLabel={mode === 'workbook' ? '✨ Go to Extra practice →' : '🎉 Back to sections'}
     />
   )
 }
@@ -55,10 +98,17 @@ const itemIds = (s: Section) => s.parts.flatMap((p) => p.items.map((i) => i.id))
 function Landing({
   title,
   intro,
+  mode,
   sections,
+  workbook,
   onNavigate,
-}: Pick<QuizExamProps, 'title' | 'intro' | 'sections' | 'onNavigate'>) {
+}: Pick<QuizExamProps, 'title' | 'intro' | 'onNavigate'> & {
+  mode: Mode
+  sections: Section[]
+  workbook: Section[]
+}) {
   const { clear } = useProgress()
+  const wb = useStats('', workbook.flatMap(itemIds))
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
       <Link to="/" className="text-lg text-indigo-700">
@@ -66,11 +116,51 @@ function Landing({
       </Link>
       <h1 className="mt-2 text-4xl font-bold">{title}</h1>
       {intro && <div className="mt-3 text-xl text-slate-700">{intro}</div>}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      {mode === 'workbook' ? (
+        <div className="mt-6 rounded-2xl bg-amber-50 p-4">
+          <h2 className="text-2xl font-bold text-amber-900">📘 Workbook review</h2>
+          <p className="text-lg text-amber-900/80">
+            All the questions from the workbooks. Do these first! ({wb.good} / {wb.total} done)
+          </p>
+        </div>
+      ) : (
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-indigo-50 p-4">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-indigo-900">✨ Extra practice</h2>
+            <p className="text-lg text-indigo-900/80">New questions for more practice.</p>
+          </div>
+          <Btn onClick={() => onNavigate({})}>← Workbook review</Btn>
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((s) => (
-          <SectionCard key={s.id} section={s} onOpen={() => onNavigate(s.id, 0)} />
+          <SectionCard
+            key={s.id}
+            section={s}
+            onOpen={() => onNavigate({ mode, section: s.id, part: 0 })}
+          />
         ))}
       </div>
+
+      {mode === 'workbook' && (
+        <button
+          type="button"
+          onClick={() => onNavigate({ mode: 'extra' })}
+          className="mt-8 flex w-full items-center gap-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 text-left active:border-indigo-400"
+        >
+          <span className="text-5xl">✨</span>
+          <span className="flex-1">
+            <span className="block text-2xl font-bold text-indigo-900">Extra practice</span>
+            <span className="block text-lg text-indigo-900/80">
+              Finished the workbook? Try new questions on the same topics.
+            </span>
+          </span>
+          <span className="text-3xl text-indigo-700">→</span>
+        </button>
+      )}
+
       <div className="mt-8">
         <Btn
           onClick={() => {
@@ -116,11 +206,15 @@ function SectionView({
   next,
   part,
   onNavigate,
+  onFinish,
+  finishLabel,
 }: {
   section: Section
   next?: Section
   part: number
-  onNavigate: QuizExamProps['onNavigate']
+  onNavigate: Nav
+  onFinish: () => void
+  finishLabel: string
 }) {
   const { clear } = useProgress()
   const [resetKey, setResetKey] = useState(0)
@@ -130,9 +224,11 @@ function SectionView({
   const Aside = p.aside
   // With an aside (e.g. a map) on wide screens, items share the page with it: one column.
   const cols = Aside
-    ? { 1: '', 2: 'md:grid-cols-2 min-[1100px]:grid-cols-1', 3: 'md:grid-cols-2 min-[1100px]:grid-cols-1' }[
-        p.columns ?? 1
-      ]
+    ? {
+        1: '',
+        2: 'md:grid-cols-2 min-[1100px]:grid-cols-1',
+        3: 'md:grid-cols-2 min-[1100px]:grid-cols-1',
+      }[p.columns ?? 1]
     : { 1: '', 2: 'md:grid-cols-2', 3: 'md:grid-cols-2 lg:grid-cols-3' }[p.columns ?? 1]
 
   return (
@@ -157,9 +253,7 @@ function SectionView({
               className={`h-11 w-11 shrink-0 rounded-full border-2 text-lg font-semibold ${
                 i === part
                   ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : sp.source
-                    ? 'border-amber-300 bg-amber-50'
-                    : 'border-slate-300 bg-white'
+                  : 'border-slate-300 bg-white'
               }`}
             >
               {i + 1}
@@ -179,7 +273,13 @@ function SectionView({
         </span>
         {p.title}
       </h2>
-      <div className={Aside ? 'min-[1100px]:grid min-[1100px]:grid-cols-2 min-[1100px]:items-start min-[1100px]:gap-6' : ''}>
+      <div
+        className={
+          Aside
+            ? 'min-[1100px]:grid min-[1100px]:grid-cols-2 min-[1100px]:items-start min-[1100px]:gap-6'
+            : ''
+        }
+      >
         {Aside && (
           <div className="mt-4 min-[1100px]:sticky min-[1100px]:top-32">
             <Aside />
@@ -217,8 +317,8 @@ function SectionView({
           </Btn>
         )}
         {isLast && !next && (
-          <Btn tone="primary" onClick={() => onNavigate()}>
-            🎉 Back to sections
+          <Btn tone="primary" onClick={onFinish}>
+            {finishLabel}
           </Btn>
         )}
       </div>
