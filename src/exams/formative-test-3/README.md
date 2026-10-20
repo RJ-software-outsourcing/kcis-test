@@ -102,8 +102,8 @@ Landing page = grid of section cards showing progress. Inside a section, one **p
   - No handwriting recognition. "Show answer" reveals the expected answer (when there is one), then the child self-marks "I got it" / "Try again".
   - Open-ended items have no answer; "Done" marks them complete.
 - **Written predictions** (workbook style): write the prediction ✍️ → "Read on" shows the next part → the child answers "Was your prediction correct? Yes / No".
-- **Source badge**: workbook parts show a 📘 badge with the book and page.
-- **🔊 Listen**: Web Speech API (`speechSynthesis`, en-US) reads the word or sentence aloud. Never read aloud the answer to a picture-naming item.
+- **Source badge**: workbook parts show a 📘 badge with the book and page. Part buttons show numbers only; workbook parts are tinted amber.
+- **🔊 Listen**: Web Speech API (`speechSynthesis`, en-US, a natural voice such as Samantha; Apple's novelty voices like Albert/Zarvox are filtered out) reads the word or sentence aloud. Never read aloud the answer to a picture-naming item.
 - Option order is shuffled on each visit.
 - Progress (results per item) is saved in `localStorage` per exam. Handwriting strokes are kept in memory for the session only. "Reset section" clears a section's progress.
 

@@ -9,11 +9,50 @@ export function shuffle<T>(arr: readonly T[]): T[] {
   return a
 }
 
+// Apple ships novelty voices (Zarvox, Trinoids, Bubbles…) that can be picked when no voice is set.
+const NOVELTY =
+  /albert|bad news|bahh|bells|boing|bubbles|cellos|eddy|flo|fred|good news|grandma|grandpa|jester|junior|kathy|organ|ralph|reed|rocko|sandy|shelley|superstar|trinoids|whisper|wobble|zarvox/i
+// Natural-sounding en-US voices, best first (iOS/macOS, Chrome, Edge/Windows).
+const PREFERRED = [
+  'Samantha',
+  'Ava',
+  'Allison',
+  'Susan',
+  'Nicky',
+  'Google US English',
+  'Microsoft Aria',
+  'Microsoft Jenny',
+  'Microsoft Zira',
+]
+
+let voice: SpeechSynthesisVoice | null | undefined
+
+function pickVoice(): SpeechSynthesisVoice | null {
+  const all = window.speechSynthesis.getVoices()
+  const en = all.filter((v) => /^en[-_]US$/i.test(v.lang) && !NOVELTY.test(v.name))
+  const score = (v: SpeechSynthesisVoice) => {
+    const i = PREFERRED.findIndex((n) => v.name.startsWith(n))
+    const rank = i < 0 ? PREFERRED.length : i
+    const quality = /premium|enhanced|natural/i.test(v.name) ? 0 : 0.5
+    return rank + quality
+  }
+  return en.sort((a, b) => score(a) - score(b))[0] ?? null
+}
+
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  // Voices load asynchronously in most browsers.
+  window.speechSynthesis.addEventListener?.('voiceschanged', () => {
+    voice = pickVoice()
+  })
+}
+
 export function speak(text: string) {
   if (!('speechSynthesis' in window)) return
+  if (!voice) voice = pickVoice()
   const u = new SpeechSynthesisUtterance(text)
   u.lang = 'en-US'
-  u.rate = 0.8
+  if (voice) u.voice = voice
+  u.rate = 0.9
   window.speechSynthesis.cancel()
   window.speechSynthesis.speak(u)
 }

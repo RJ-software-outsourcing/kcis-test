@@ -148,18 +148,21 @@ function SectionView({
           </span>
         </div>
         <nav className="mt-3 flex gap-2 overflow-x-auto">
-          {section.parts.map((_, i) => (
+          {section.parts.map((sp, i) => (
             <button
               key={i}
               type="button"
+              aria-label={`Part ${i + 1}${sp.source ? ` (${sp.source})` : ''}`}
               onClick={() => onNavigate(section.id, i)}
-              className={`min-h-11 min-w-11 rounded-full border-2 px-3 text-lg font-semibold ${
+              className={`h-11 w-11 shrink-0 rounded-full border-2 text-lg font-semibold ${
                 i === part
                   ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-slate-300 bg-white'
+                  : sp.source
+                    ? 'border-amber-300 bg-amber-50'
+                    : 'border-slate-300 bg-white'
               }`}
             >
-              {section.parts[i].source ? '📘 ' : ''}Part {i + 1}
+              {i + 1}
             </button>
           ))}
         </nav>
