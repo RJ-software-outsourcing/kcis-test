@@ -25,7 +25,8 @@ export default function ExamPage() {
             Unit 3, Weeks 7–8 · Story: <i>Making a Map</i> · Test day: <b>Friday, October 23</b>
           </p>
           <p className="mt-1 text-lg text-slate-500">
-            ✍️ Writing questions work with Apple Pencil or your finger. 🔊 Tap the speaker to listen.
+            ✍️ Writing questions work with Apple Pencil or your finger. 🔊 Tap the speaker to
+            listen.
           </p>
         </>
       }

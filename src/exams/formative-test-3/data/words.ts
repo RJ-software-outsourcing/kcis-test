@@ -22,6 +22,30 @@ export const words = defineSection({
   emoji: '⭐',
   parts: [
     {
+      source: 'Phonics p.20',
+      title: 'Write the missing word to complete each sentence. Words: as, he, to, with, three',
+      columns: 2,
+      items: [
+        fill('Ken will run ___ Kim.', 'with', ['with', 'as', 'he']),
+        fill('___ will run with Jim.', 'He', ['He', 'To', 'As']),
+        fill('The ___ dogs will run to Sam.', 'three', ['three', 'with', 'as']),
+        fill('The three dogs will run ___ Sam.', 'to', ['to', 'he', 'with']),
+        fill('They will not get ___ wet as Sam.', 'as', ['as', 'to', 'he']),
+      ],
+    },
+    {
+      source: 'Phonics p.24',
+      title: 'Pick a word from the box to complete each sentence. Words: go, me, for, here, where',
+      columns: 2,
+      items: [
+        fill('___ is Vic?', 'Where', ['Where', 'Me', 'For']),
+        fill('Did he ___ up the hill?', 'go', ['go', 'here', 'me']),
+        fill('We can look ___ him.', 'for', ['for', 'where', 'go']),
+        fill('Run with ___ up the hill.', 'me', ['me', 'for', 'where']),
+        fill('___ he is!', 'Here', ['Here', 'Go', 'Me']),
+      ],
+    },
+    {
       title: 'Tap 🔊 to listen. Then tap the word you hear.',
       columns: 2,
       items: [

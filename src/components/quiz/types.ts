@@ -15,6 +15,8 @@ export interface ChoiceItem {
   noSpeak?: boolean
   /** Don't shuffle the options (e.g. Yes / No) */
   keepOrder?: boolean
+  /** Per-blank text shown once correct, when blanks differ (e.g. ["Z", "z"]). Defaults to `answer`. */
+  fills?: string[]
   options: string[]
   answer: string
 }
@@ -40,14 +42,17 @@ export interface WriteItem {
   draw?: boolean
 }
 
-/** Read, predict, then read on to check and correct the prediction. */
+/**
+ * Read, predict, then read on to check and correct the prediction.
+ * Without `options`, the child writes the prediction and self-checks it.
+ */
 export interface PredictItem {
   kind: 'predict'
   before: string
   question: string
-  options: string[]
-  /** What really happens in the story */
-  answer: string
+  options?: string[]
+  /** What really happens in the story (required with `options`) */
+  answer?: string
   after: string
 }
 
@@ -57,6 +62,8 @@ export type Item = ItemInput & { id: string }
 export interface PartInput {
   /** Directions shown above the part */
   title: string
+  /** Where the questions come from, e.g. "IT LAW p.20". Omit for extra practice. */
+  source?: string
   /** Extra content above the items (e.g. a map or a code key) */
   aside?: ComponentType
   /** Grid columns on wide screens */

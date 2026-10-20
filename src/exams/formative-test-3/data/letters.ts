@@ -18,13 +18,28 @@ const begins = (picture: string, word: string, options: string[]): ChoiceItem =>
   answer: word[0],
 })
 
-const missing = (prompt: string, answer: string, options: string[]): ChoiceItem => ({
+const missing = (
+  prompt: string,
+  answer: string,
+  options: string[],
+  fills?: string[],
+): ChoiceItem => ({
   kind: 'choice',
   prompt,
   noSpeak: true,
   options,
   answer,
+  fills,
 })
+
+const listen = (word: string, options: string[]): ChoiceItem => ({
+  kind: 'choice',
+  speak: word,
+  options,
+  answer: word,
+})
+
+const STORY = 'Ken will jog with Kim. He will jog with Jeff. The three like to run.'
 
 export const letters = defineSection({
   id: 'letters',
@@ -32,6 +47,111 @@ export const letters = defineSection({
   subtitle: 'Rr Ww Jj Kk (Wk 7) · Vv Yy Zz (Wk 8)',
   emoji: '🔤',
   parts: [
+    {
+      source: 'Phonics p.19',
+      title: 'Say the picture name. Choose the word that names the picture.',
+      columns: 2,
+      items: [
+        nameIt('🐀', 'rat', ['rip', 'rat', 'run']),
+        nameIt('🏺', 'jug', ['jet', 'jam', 'jug']),
+        nameIt('🧒', 'kid', ['kin', 'kid', 'kit']),
+        nameIt('🕸️', 'web', ['web', 'win', 'wet']),
+      ],
+    },
+    {
+      source: 'Phonics p.23',
+      title: 'Write the letter v, z, or y to complete the words. Then read the sentence.',
+      items: [
+        missing('A ___et is in the ___an.', 'v', VYZ),
+        missing('Can ___ac ___ip it up?', 'z', VYZ, ['Z', 'z']),
+        missing('___es, I like the ___ak.', 'y', VYZ, ['Y', 'y']),
+      ],
+    },
+    {
+      source: 'myView p.205',
+      title: 'Say each picture name. Listen to the sound at the beginning of each word.',
+      columns: 2,
+      items: [
+        begins('🪨', 'rock', RWJK),
+        begins('🕸️', 'web', RWJK),
+        begins('🏺', 'jug', RWJK),
+        begins('🪁', 'kite', RWJK),
+        listen('rip', ['rip', 'job', 'kit']),
+        listen('job', ['rip', 'job', 'web']),
+      ],
+    },
+    {
+      source: 'myView p.209',
+      title: 'Decode these words. Tap 🔊 and tap the word you hear.',
+      columns: 2,
+      items: [
+        listen('rag', ['rag', 'rat', 'rug']),
+        listen('rug', ['rat', 'rug', 'rag']),
+        listen('wag', ['web', 'wag', 'wet']),
+        listen('wet', ['wet', 'web', 'wag']),
+        listen('jet', ['jug', 'Jan', 'jet']),
+        listen('Jan', ['jet', 'Jan', 'jug']),
+        listen('kit', ['Ken', 'kit', 'kid']),
+        listen('kid', ['kid', 'kit', 'Ken']),
+      ],
+    },
+    {
+      source: 'myView p.209',
+      title: 'Write the letter r, w, j, or k to finish the words. Then read the sentences.',
+      columns: 2,
+      items: [
+        missing('___im will jog.', 'K', ['R', 'W', 'J', 'K']),
+        missing('Kim will ___og.', 'j', RWJK),
+        missing('Wes ___ill run.', 'w', RWJK),
+        missing('Wes will ___un.', 'r', RWJK),
+        missing('Can ___im win?', 'J', ['R', 'W', 'J', 'K']),
+      ],
+    },
+    {
+      source: 'myView p.210',
+      title:
+        'Choose the word that completes each sentence. Think about the sounds the letters spell.',
+      columns: 2,
+      items: [
+        {
+          kind: 'choice',
+          picture: '🟦',
+          prompt: 'We sit on the ___.',
+          options: ['rug', 'web', 'jug'],
+          answer: 'rug',
+        },
+        {
+          kind: 'choice',
+          picture: '🕸️',
+          prompt: 'I see a big ___.',
+          options: ['rug', 'web', 'kit'],
+          answer: 'web',
+        },
+        {
+          kind: 'write',
+          prompt: 'Write a sentence that includes words with r, w, j, or k.',
+          lines: 2,
+        },
+      ],
+    },
+    {
+      source: 'myView p.211',
+      title: 'Read the story "Three Will Run".',
+      items: [
+        {
+          kind: 'choice',
+          prompt: `${STORY}\nWhich three words have the j sound?`,
+          options: ['jog, jog, Jeff', 'Ken, Kim, like', 'will, with, run'],
+          answer: 'jog, jog, Jeff',
+        },
+        {
+          kind: 'choice',
+          prompt: `${STORY}\nWhich two words begin with the k sound spelled k?`,
+          options: ['Ken, Kim', 'jog, Jeff', 'three, run'],
+          answer: 'Ken, Kim',
+        },
+      ],
+    },
     {
       title: 'Match each big letter to its small letter.',
       items: [

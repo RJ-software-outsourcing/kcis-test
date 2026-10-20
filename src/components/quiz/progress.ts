@@ -5,7 +5,8 @@ type Progress = Record<string, Result>
 
 const listeners = new Set<() => void>()
 const cache = new Map<string, Progress>()
-const storageKey = (examId: string) => `kcis:${examId}:progress`
+// Bump the version when item ids shift (ids are positional), so old results do not land on new items.
+const storageKey = (examId: string) => `kcis:${examId}:progress:v2`
 
 function load(examId: string): Progress {
   let p = cache.get(examId)

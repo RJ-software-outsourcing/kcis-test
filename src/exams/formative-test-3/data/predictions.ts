@@ -7,6 +7,34 @@ export const predictions = defineSection({
   emoji: '🔮',
   parts: [
     {
+      source: 'IT LAW p.27',
+      title: 'Read the story. When there is a break, make a prediction.',
+      items: [
+        {
+          kind: 'predict',
+          before:
+            'Lila wanted to take the dog for a walk in the park. She saw dark clouds in the sky as she walked to the park.',
+          question: 'Prediction 1: What do you think the clouds will do in the story?',
+          after:
+            '"I think it\'s going to rain," she said. Soon, she felt a cool breeze, and drops of water started falling.',
+        },
+      ],
+    },
+    {
+      source: 'IT LAW p.27',
+      title: 'Lila\'s story, continued. Make your second prediction.',
+      items: [
+        {
+          kind: 'predict',
+          before:
+            '"I think it\'s going to rain," she said. Soon, she felt a cool breeze, and drops of water started falling.',
+          question: 'Prediction 2: What do you think Lila will do next?',
+          after:
+            'Lila smiled and opened her umbrella. "I\'m glad I brought this!" she said. She took her dog for a walk in the park, in the rain.',
+        },
+      ],
+    },
+    {
       title: 'Read the story. Make a prediction. Then read on to check it.',
       items: [
         {
@@ -19,11 +47,11 @@ export const predictions = defineSection({
         },
         {
           kind: 'predict',
-          before: 'Up went the kite! Then the wind stopped.',
-          question: 'What will the kite do next?',
-          options: ['It will come down.', 'It will fly to the moon.', 'It will eat lunch.'],
-          answer: 'It will come down.',
-          after: 'The kite came down on the grass. Ben ran to get it.',
+          before: 'Max put a cup of ice on the table. The sun was very hot.',
+          question: 'What will happen to the ice?',
+          options: ['It will melt.', 'It will get bigger.', 'It will turn into a cat.'],
+          answer: 'It will melt.',
+          after: 'Soon the ice was gone. There was only water in the cup!',
         },
         {
           kind: 'predict',
@@ -31,7 +59,7 @@ export const predictions = defineSection({
           question: 'What will happen next?',
           options: ['It will rain.', 'It will be very hot.', 'It will snow candy.'],
           answer: 'It will rain.',
-          after: 'Drip, drop! Rain fell on Pam\'s hat. She ran home.',
+          after: "Drip, drop! Rain fell on Pam's hat. She ran home.",
         },
       ],
     },
@@ -40,7 +68,7 @@ export const predictions = defineSection({
       items: [
         {
           kind: 'predict',
-          before: 'Jen made a map of her street. She ran to her friend Kim\'s house with the map.',
+          before: "Jen made a map of her street. She ran to her friend Kim's house with the map.",
           question: 'What will Jen do next?',
           options: ['Show the map to Kim.', 'Throw the map away.', 'Take a nap.'],
           answer: 'Show the map to Kim.',
@@ -48,11 +76,11 @@ export const predictions = defineSection({
         },
         {
           kind: 'predict',
-          before: 'Kim looked at the map. She saw her own house on it!',
-          question: 'How will Kim feel?',
-          options: ['Happy', 'Sad', 'Mad'],
-          answer: 'Happy',
-          after: 'Kim smiled. "I like your map, Jen!"',
+          before: 'Zoe got a new puppy. She wants to get a bed and a ball for it.',
+          question: 'Where will Zoe go?',
+          options: ['To the pet store.', 'To the library.', 'To school.'],
+          answer: 'To the pet store.',
+          after: 'Zoe went to the pet store. She got a red ball and a soft bed.',
         },
         {
           kind: 'predict',
@@ -77,7 +105,7 @@ export const predictions = defineSection({
         },
         {
           kind: 'predict',
-          before: 'Sam\'s dog ran to the door with a ball in its mouth.',
+          before: "Sam's dog ran to the door with a ball in its mouth.",
           question: 'What does the dog want?',
           options: ['To play outside.', 'To take a bath.', 'To read a book.'],
           answer: 'To play outside.',
@@ -103,7 +131,8 @@ export const predictions = defineSection({
         },
         {
           kind: 'write',
-          prompt: 'Lily has paper and crayons. She wants to show her friends where she lives. What will Lily make?',
+          prompt:
+            'Lily has paper and crayons. She wants to show her friends where she lives. What will Lily make?',
           lines: 2,
         },
       ],

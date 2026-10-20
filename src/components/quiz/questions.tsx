@@ -34,7 +34,9 @@ function Choice({ item, number }: { item: WithId<ChoiceItem>; number: number }) 
     progress[item.id] === 'correct' ? item.answer : null,
   )
   const correct = picked === item.answer
-  const speakText = item.noSpeak ? undefined : (item.speak ?? (item.prompt && speakable(item.prompt)))
+  const speakText = item.noSpeak
+    ? undefined
+    : (item.speak ?? (item.prompt && speakable(item.prompt)))
 
   const pick = (o: string) => {
     if (picked) return
@@ -48,8 +50,11 @@ function Choice({ item, number }: { item: WithId<ChoiceItem>; number: number }) 
       {(item.prompt || speakText) && (
         <div className="mt-2 flex items-start gap-3">
           {item.prompt && (
-            <p className="flex-1 text-2xl leading-relaxed">
-              <WithBlanks text={item.prompt} fill={correct ? item.answer : undefined} />
+            <p className="flex-1 text-2xl leading-relaxed whitespace-pre-line">
+              <WithBlanks
+                text={item.prompt}
+                fill={correct ? (item.fills ?? item.answer) : undefined}
+              />
             </p>
           )}
           {speakText && <SpeakButton text={speakText} />}
@@ -195,7 +200,9 @@ function Match({ item, number }: { item: WithId<MatchItem>; number: number }) {
             Check
           </Btn>
         )}
-        {checked && allRight && <span className="font-semibold text-emerald-700">✅ All correct!</span>}
+        {checked && allRight && (
+          <span className="font-semibold text-emerald-700">✅ All correct!</span>
+        )}
         {checked && !allRight && (
           <>
             <span className="font-semibold text-rose-700">❌ Some are not right yet.</span>
@@ -232,7 +239,9 @@ function Write({ item, number }: { item: WithId<WriteItem>; number: number }) {
       {(item.prompt || item.speak) && (
         <div className="mt-2 flex items-start gap-3">
           {item.prompt && <p className="flex-1 text-2xl leading-relaxed">{item.prompt}</p>}
-          {item.speak && <SpeakButton text={item.speak} label={item.prompt ? undefined : 'Listen'} />}
+          {item.speak && (
+            <SpeakButton text={item.speak} label={item.prompt ? undefined : 'Listen'} />
+          )}
         </div>
       )}
       <div className="mt-3">
@@ -288,21 +297,51 @@ function Write({ item, number }: { item: WithId<WriteItem>; number: number }) {
 }
 
 function Predict({ item, number }: { item: WithId<PredictItem>; number: number }) {
+  return item.options ? (
+    <PredictChoice item={item} options={item.options} number={number} />
+  ) : (
+    <PredictWrite item={item} number={number} />
+  )
+}
+
+function StoryBox({ text, tone }: { text: string; tone: 'before' | 'after' }) {
+  return (
+    <div
+      className={`flex items-start gap-3 rounded-xl p-4 ${tone === 'before' ? 'bg-amber-50' : 'bg-sky-50'}`}
+    >
+      <p className="flex-1 text-2xl leading-relaxed">{text}</p>
+      <SpeakButton text={text} />
+    </div>
+  )
+}
+
+function PredictQuestion({ text }: { text: string }) {
+  return (
+    <div className="mt-4 flex items-start gap-3">
+      <p className="flex-1 text-2xl font-semibold">🔮 {text}</p>
+      <SpeakButton text={text} />
+    </div>
+  )
+}
+
+function PredictChoice({
+  item,
+  options: rawOptions,
+  number,
+}: {
+  item: WithId<PredictItem>
+  options: string[]
+  number: number
+}) {
   const { setResult } = useProgress()
-  const options = useMemo(() => shuffle(item.options), [item])
+  const options = useMemo(() => shuffle(rawOptions), [rawOptions])
   const [picked, setPicked] = useState<string | null>(null)
   const right = picked === item.answer
 
   return (
     <Card number={number} result={picked ? (right ? 'correct' : 'wrong') : undefined}>
-      <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4">
-        <p className="flex-1 text-2xl leading-relaxed">{item.before}</p>
-        <SpeakButton text={item.before} />
-      </div>
-      <div className="mt-4 flex items-start gap-3">
-        <p className="flex-1 text-2xl font-semibold">🔮 {item.question}</p>
-        <SpeakButton text={item.question} />
-      </div>
+      <StoryBox text={item.before} tone="before" />
+      <PredictQuestion text={item.question} />
       <div className="mt-3 flex flex-wrap gap-3">
         {options.map((o) => (
           <button
@@ -328,13 +367,14 @@ function Predict({ item, number }: { item: WithId<PredictItem>; number: number }
       {picked && (
         <>
           <p className="mt-4 text-lg font-semibold text-slate-600">📖 Read on to check:</p>
-          <div className="mt-1 flex items-start gap-3 rounded-xl bg-sky-50 p-4">
-            <p className="flex-1 text-2xl leading-relaxed">{item.after}</p>
-            <SpeakButton text={item.after} />
+          <div className="mt-1">
+            <StoryBox text={item.after} tone="after" />
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xl">
             {right ? (
-              <span className="font-semibold text-emerald-700">✅ Your prediction was correct!</span>
+              <span className="font-semibold text-emerald-700">
+                ✅ Your prediction was correct!
+              </span>
             ) : (
               <span className="font-semibold text-rose-700">
                 ✏️ Let's correct it: <span className="text-slate-900">{item.answer}</span>
@@ -348,6 +388,54 @@ function Predict({ item, number }: { item: WithId<PredictItem>; number: number }
             >
               ↺ Try again
             </Btn>
+          </div>
+        </>
+      )}
+    </Card>
+  )
+}
+
+function PredictWrite({ item, number }: { item: WithId<PredictItem>; number: number }) {
+  const { progress, setResult } = useProgress()
+  const result = progress[item.id]
+  const [shown, setShown] = useState(!!result)
+
+  return (
+    <Card number={number} result={result ? 'done' : undefined}>
+      <StoryBox text={item.before} tone="before" />
+      <PredictQuestion text={item.question} />
+      <div className="mt-3">
+        <HandwritingPad id={item.id} lines={2} />
+      </div>
+      {!shown ? (
+        <div className="mt-3">
+          <Btn tone="primary" onClick={() => setShown(true)}>
+            📖 Read on
+          </Btn>
+        </div>
+      ) : (
+        <>
+          <div className="mt-4">
+            <StoryBox text={item.after} tone="after" />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xl">
+            <span className="font-semibold">Was your prediction correct?</span>
+            {result ? (
+              <span className="font-semibold text-emerald-700">
+                {result === 'correct'
+                  ? '✅ Yes!'
+                  : "✏️ No — that's OK, now you know what happened."}
+              </span>
+            ) : (
+              <>
+                <Btn tone="good" onClick={() => setResult(item.id, 'correct')}>
+                  Yes
+                </Btn>
+                <Btn tone="bad" onClick={() => setResult(item.id, 'done')}>
+                  No
+                </Btn>
+              </>
+            )}
           </div>
         </>
       )}

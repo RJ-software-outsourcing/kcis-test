@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem } from '../../../components/quiz/types'
-import { TownMap } from '../TownMap'
+import { TownMap, WorkbookMap } from '../TownMap'
 
 const q = (prompt: string, answer: string, others: string[]): ChoiceItem => ({
   kind: 'choice',
@@ -15,6 +15,53 @@ export const map = defineSection({
   subtitle: 'Find graphics: labels, streets, map key',
   emoji: '🧭',
   parts: [
+    {
+      source: 'IT LAW p.23',
+      title: 'Draw labels to some of the places on the map. Places A, B, and C have no label.',
+      aside: WorkbookMap,
+      items: [
+        {
+          kind: 'write',
+          prompt:
+            'What could places A, B, and C be? Write a label for each one (like "A: Toy Store").',
+          lines: 3,
+        },
+      ],
+    },
+    {
+      source: 'IT LAW p.23',
+      title: 'Link the map to yourself. Answer in full sentences.',
+      aside: WorkbookMap,
+      items: [
+        {
+          kind: 'write',
+          prompt: 'What are some places on the map that you have near your home?',
+          lines: 2,
+        },
+      ],
+    },
+    {
+      title: 'Look at My Map. Use the labels and streets to answer.',
+      aside: WorkbookMap,
+      columns: 2,
+      items: [
+        q('What is the name of the park?', 'Hillside Park', ['Long Pond', 'Main Street']),
+        q('What is the name of the pond?', 'Long Pond', ['Hillside Park', 'Oak Street']),
+        q('What is next to Long Pond?', 'the Pet Store', ['the Library', 'My home']),
+        q('Which street is between My home and Elm Street School?', 'Green Street', [
+          'Oak Street',
+          'Main Street',
+        ]),
+        q('Which street is between the Library and Hillside Park?', 'Elm Street', [
+          'Green Street',
+          'First Street',
+        ]),
+        q('Which street is between Hillside Park and the Grocery Store?', 'Main Street', [
+          'First Street',
+          'Green Street',
+        ]),
+      ],
+    },
     {
       title: 'Look at the map. Use the labels to answer.',
       aside: TownMap,
@@ -54,7 +101,11 @@ export const map = defineSection({
       title: 'Link the map to yourself. Answer in full sentences.',
       aside: TownMap,
       items: [
-        { kind: 'write', prompt: 'What places on this map do you also have near your home?', lines: 2 },
+        {
+          kind: 'write',
+          prompt: 'What places on this map do you also have near your home?',
+          lines: 2,
+        },
         { kind: 'write', prompt: 'Which place on the map would you like to visit? Why?', lines: 2 },
       ],
     },

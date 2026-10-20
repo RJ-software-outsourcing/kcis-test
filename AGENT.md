@@ -61,12 +61,13 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 - **Per-exam rules** go in `src/exams/<slug>/README.md`; only project-wide rules go in this file.
 - **Source material** (`test-raw-material/`) is read-only: don't modify it.
 - **Include the workbook's questions**: every question in the source workbooks goes into the exam, in a part marked with its `source` (e.g. `IT LAW p.20`) and listed before the extra practice parts. Fix obvious typos. Then add new questions for variety.
+- **No spoilers on one page**: when a later question's text reveals an earlier answer (e.g. the next part of a prediction story), put it in a separate part.
 - **Answers come from the content, not the photos**: the child's handwritten answers in the photos may be wrong. Work out the correct answer yourself.
 - **Language**: UI, questions, and docs are all in English.
 - **Styling**: Tailwind utility classes only. Font is Andika (designed for beginning readers).
 - **Target device**: iPad (portrait and landscape). Touch targets ≥ 48 px, text ≥ 20 px.
 - **Grade level**: questions must match the source workbook's difficulty (KCIS Grade 1 so far) and stay inside the test guide's scope.
-- **Item ids** come from position (`section/part/index`), so reordering items resets saved progress for them. That's fine.
+- **Item ids** come from position (`section/part/index`). When inserting or reordering parts, bump the version in `storageKey` (`components/quiz/progress.ts`) so old results don't land on the wrong items.
 - **React effects**: always use a block body (`useEffect(() => { f() }, …)`). Concise arrows that return a value crash with "destroy is not a function".
 
 ## Deployment

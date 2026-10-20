@@ -31,7 +31,8 @@ function Inner({ title, intro, sections, sectionId, part = 0, onNavigate }: Quiz
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [sectionId, part])
-  if (idx < 0) return <Landing title={title} intro={intro} sections={sections} onNavigate={onNavigate} />
+  if (idx < 0)
+    return <Landing title={title} intro={intro} sections={sections} onNavigate={onNavigate} />
   return (
     <SectionView
       section={sections[idx]}
@@ -129,7 +130,9 @@ function SectionView({
   const Aside = p.aside
   // With an aside (e.g. a map) on wide screens, items share the page with it: one column.
   const cols = Aside
-    ? { 1: '', 2: 'md:grid-cols-2 lg:grid-cols-1', 3: 'md:grid-cols-2 lg:grid-cols-1' }[p.columns ?? 1]
+    ? { 1: '', 2: 'md:grid-cols-2 min-[1100px]:grid-cols-1', 3: 'md:grid-cols-2 min-[1100px]:grid-cols-1' }[
+        p.columns ?? 1
+      ]
     : { 1: '', 2: 'md:grid-cols-2', 3: 'md:grid-cols-2 lg:grid-cols-3' }[p.columns ?? 1]
 
   return (
@@ -156,19 +159,26 @@ function SectionView({
                   : 'border-slate-300 bg-white'
               }`}
             >
-              Part {i + 1}
+              {section.parts[i].source ? '📘 ' : ''}Part {i + 1}
             </button>
           ))}
         </nav>
       </header>
 
       <h2 className="mt-5 text-2xl font-semibold text-indigo-900">
-        <span className="mr-2 rounded-lg bg-indigo-100 px-2 py-1 text-lg">Directions</span>
+        {p.source && (
+          <span className="mr-2 inline-block rounded-lg bg-amber-100 px-2 py-1 text-lg text-amber-900">
+            📘 {p.source}
+          </span>
+        )}
+        <span className="mr-2 rounded-lg bg-indigo-100 px-2 py-1 text-lg">
+          {p.source ? 'Directions' : '✨ Extra practice'}
+        </span>
         {p.title}
       </h2>
-      <div className={Aside ? 'lg:grid lg:grid-cols-2 lg:items-start lg:gap-6' : ''}>
+      <div className={Aside ? 'min-[1100px]:grid min-[1100px]:grid-cols-2 min-[1100px]:items-start min-[1100px]:gap-6' : ''}>
         {Aside && (
-          <div className="mt-4 lg:sticky lg:top-32">
+          <div className="mt-4 min-[1100px]:sticky min-[1100px]:top-32">
             <Aside />
           </div>
         )}

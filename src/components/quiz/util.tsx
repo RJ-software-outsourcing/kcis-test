@@ -35,20 +35,21 @@ export function SpeakButton({ text, label }: { text: string; label?: string }) {
 }
 
 /** Renders `___` as an underlined blank; fills it with `fill` when given. */
-export function WithBlanks({ text, fill }: { text: string; fill?: string }) {
+export function WithBlanks({ text, fill }: { text: string; fill?: string | string[] }) {
   const parts = text.split(/_{3,}/)
   const out: ReactNode[] = []
   parts.forEach((p, i) => {
     out.push(<span key={`t${i}`}>{p}</span>)
+    const f = Array.isArray(fill) ? fill[i] : fill
     if (i < parts.length - 1)
       out.push(
         <span
           key={`b${i}`}
           className={`mx-0.5 inline-block min-w-14 border-b-4 text-center ${
-            fill ? 'border-emerald-500 font-bold text-emerald-700' : 'border-slate-400'
+            f ? 'border-emerald-500 font-bold text-emerald-700' : 'border-slate-400'
           }`}
         >
-          {fill ?? ' '}
+          {f ?? ' '}
         </span>,
       )
   })
