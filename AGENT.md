@@ -57,3 +57,6 @@ test-raw-material/<slug>/   該考試的教材來源（只讀素材）
 
 ## Git 流程
 任務完成後直接 push 到 `main`，在 GitHub Pages 上驗證即可（不開 PR）。
+
+## 本機 push 注意
+此 repo 需用 `~/.ssh/id_ed25519`（身分 RJ-software-outsourcing）push；預設的 gravitysketch key 無寫入權限。已在本機 repo 設定 `core.sshCommand`（`git config core.sshCommand "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes"`），若 push 被拒先檢查這項。
