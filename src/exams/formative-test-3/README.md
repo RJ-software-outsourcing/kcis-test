@@ -11,7 +11,11 @@ Test date: **Friday, October 23** (Grade 1, Unit 3, Weeks 7–8; myView 1.1 Unit
 | `phonics-page-18-25/` | Phonics workbook p.18–25 | Short u, Rr/Ww/Jj/Kk, My Words to Know, Qu/qu, Vv/Yy/Zz |
 | `my-view/` | myView 1.1 pages (p.192, 204–211, short-u pages) | *Making a Map* preview vocabulary, procedural text (First/Next/Last), extra phonics practice |
 
-The workbook pages already have the child's answers written in. **Do not copy those items verbatim.** Reuse the *question types* and write new items with the same words and difficulty.
+The workbook pages already have the child's answers written in, so they can't be reused on paper.
+- **Every workbook question is re-created on the site** (blank, interactive), in a part marked with its source page (📘 IT LAW p.20, Phonics p.18, myView p.204 …). Those parts come first in each section.
+- **Extra practice parts** follow, with new questions of the same types and difficulty.
+- Answers are worked out from the content, not copied from the handwriting in the photos.
+- Typos in the workbook are fixed (e.g. IT LAW p.26 "The key shows the what colors mean").
 
 ## Scope (from the guide — stay inside it)
 - **Week 7**
@@ -32,6 +36,20 @@ Out of scope: words with blends/digraphs as *spelling* targets (except the guide
 
 ## Difficulty
 KCIS Grade 1. Short sentences (≤ 12 words), CVC words, vocabulary from the lists above, 2–4 answer options. New items must match the workbook difficulty.
+
+## Workbook coverage
+| Section | Workbook parts |
+|---|---|
+| Short u | Phonics p.18 (short u yes/no), p.21 (ending sound, two more words); myView short-u pages (read words, add u and match, write words), p.204 (spell) |
+| Letters | Phonics p.19 (circle the word), p.23 (Vv Yy Zz sentences); myView p.205 (initial sounds), p.209 (decode words, missing letters), p.210 (complete sentences, write a sentence), p.211 (*Three Will Run*) |
+| Qu / qu | Phonics p.22 (begins like quit), p.25 (symbol code, 10 words, workbook key) |
+| My Words to Know | Phonics p.20 (as, he, to, with, three), p.24 (go, me, for, here, where) |
+| Vocabulary 1 / 2 | IT LAW p.20–21, p.24–25 (fill in, match with workbook definitions, sentence + picture) |
+| Making a Map | IT LAW p.22, p.26 (multiple choice, complete sentences); myView p.208 (write steps) |
+| Read a Map | IT LAW p.23 (workbook map re-drawn: label unlabeled places, places near your home) |
+| Predictions | IT LAW p.27 (Lila story: write predictions, read on, check yes/no) |
+
+Note: Phonics p.20 lists **three** where the guide lists **there**; both are included.
 
 ## Sections (one screen each; each section is split into parts)
 Landing page = grid of section cards showing progress. Inside a section, one **part** (one set of directions) at a time, with Prev/Next.
@@ -83,6 +101,8 @@ Landing page = grid of section cards showing progress. Inside a section, one **p
   - Undo and Clear buttons.
   - No handwriting recognition. "Show answer" reveals the expected answer (when there is one), then the child self-marks "I got it" / "Try again".
   - Open-ended items have no answer; "Done" marks them complete.
+- **Written predictions** (workbook style): write the prediction ✍️ → "Read on" shows the next part → the child answers "Was your prediction correct? Yes / No".
+- **Source badge**: workbook parts show a 📘 badge with the book and page.
 - **🔊 Listen**: Web Speech API (`speechSynthesis`, en-US) reads the word or sentence aloud. Never read aloud the answer to a picture-naming item.
 - Option order is shuffled on each visit.
 - Progress (results per item) is saved in `localStorage` per exam. Handwriting strokes are kept in memory for the session only. "Reset section" clears a section's progress.

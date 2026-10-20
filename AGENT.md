@@ -6,7 +6,7 @@
 **Check whether this file needs updating** (new conventions, directory structure, commands, pitfalls). If so, update it in the same commit.
 
 ## Purpose
-Generate exam-prep questions from everyday study material (`test-raw-material/`). The material usually contains questions with answers already filled in, which makes it hard to review from. So create **new** questions based on the material — do not copy existing questions or answers verbatim.
+Generate exam-prep questions from everyday study material (`test-raw-material/`). The material usually contains questions with answers already filled in, which makes it hard to review from. So the site re-creates the workbook's own questions as blank, interactive items (no pre-filled answers), **and** adds new questions of the same types and difficulty for variety.
 
 ## Tech stack
 Vite + React 19 + TypeScript + Tailwind CSS v4 + TanStack Router (file-based routing).
@@ -59,7 +59,9 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 ## Rules
 - **Dynamic loading**: every exam page must be its own chunk; `/` may only load `meta.ts` files.
 - **Per-exam rules** go in `src/exams/<slug>/README.md`; only project-wide rules go in this file.
-- **Source material** (`test-raw-material/`) is read-only: don't modify it, and don't expose its existing answers on the website.
+- **Source material** (`test-raw-material/`) is read-only: don't modify it.
+- **Include the workbook's questions**: every question in the source workbooks goes into the exam, in a part marked with its `source` (e.g. `IT LAW p.20`) and listed before the extra practice parts. Fix obvious typos. Then add new questions for variety.
+- **Answers come from the content, not the photos**: the child's handwritten answers in the photos may be wrong. Work out the correct answer yourself.
 - **Language**: UI, questions, and docs are all in English.
 - **Styling**: Tailwind utility classes only. Font is Andika (designed for beginning readers).
 - **Target device**: iPad (portrait and landscape). Touch targets ≥ 48 px, text ≥ 20 px.
