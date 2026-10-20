@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-3xl font-bold">考試列表</h1>
+      <h1 className="text-3xl font-bold">Exams</h1>
       <ul className="mt-6 space-y-3">
         {exams.map((exam) => (
           <li key={exam.slug}>

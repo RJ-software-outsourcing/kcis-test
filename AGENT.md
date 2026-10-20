@@ -1,62 +1,63 @@
-# AGENT.md — 專案通用規則
+# AGENT.md — Project-wide rules
 
-> 給所有 AI agent（Claude Code 等）的專案說明。`CLAUDE.md` 只是指向本檔。
+> Instructions for all AI agents (Claude Code, etc.). `CLAUDE.md` only points here.
 
-## ⚠️ 每次任務結束前
-**檢查本檔是否需要更新**（新增慣例、目錄結構、指令、踩過的坑）。需要就在同一個 commit 一起更新。
+## ⚠️ Before finishing every task
+**Check whether this file needs updating** (new conventions, directory structure, commands, pitfalls). If so, update it in the same commit.
 
-## 專案目的
-用日常教材（`test-raw-material/`）產生考前練習題。教材裡的題目通常已附答案、難以重複練習，所以要由教材**重新出題**，而不是照抄既有題目與答案。
+## Purpose
+Generate exam-prep questions from everyday study material (`test-raw-material/`). The material usually contains questions with answers already filled in, which makes it hard to review from. So create **new** questions based on the material — do not copy existing questions or answers verbatim.
 
-## 技術棧
-Vite + React 19 + TypeScript + Tailwind CSS v4 + TanStack Router（file-based routing）。
+## Tech stack
+Vite + React 19 + TypeScript + Tailwind CSS v4 + TanStack Router (file-based routing).
 
-## 指令
-- `npm run dev` — 本機開發（網址含 base：`http://localhost:5173/kcis-test/`）
-- `npm run build` — `vite build`（同時產生 `src/routeTree.gen.ts`）→ `tsc -b` → 複製 `index.html` 為 `404.html`
-- 注意：型別檢查依賴 `routeTree.gen.ts`，所以 build 順序是先 vite 後 tsc。
+## Commands
+- `npm run dev` — local dev (the URL includes the base: `http://localhost:5173/kcis-test/`)
+- `npm run build` — `vite build` (also generates `src/routeTree.gen.ts`) → `tsc -b` → copy `index.html` to `404.html`
+- Note: type-checking depends on `routeTree.gen.ts`, so the build runs vite first, then tsc.
 
-## 目錄結構
+## Directory structure
 ```
 src/
-  main.tsx              Router 設定（basepath 取自 BASE_URL）
-  routes/               TanStack Router 檔案路由（薄薄一層）
+  main.tsx              Router setup (basepath from BASE_URL)
+  routes/               TanStack Router file routes (thin layer)
     __root.tsx
-    index.tsx           "/" 列出所有考試（讀 src/exams/*/meta.ts）
-    <slug>.tsx          每個考試一個 route，載入 src/exams/<slug>/ExamPage
+    index.tsx           "/" lists all exams (reads src/exams/*/meta.ts)
+    <slug>.tsx          One route per exam, loads src/exams/<slug>/ExamPage
   exams/
-    types.ts            ExamMeta 型別
-    index.ts            以 import.meta.glob 收集所有 meta
+    types.ts            ExamMeta type
+    index.ts            Collects all meta via import.meta.glob
     <slug>/
       meta.ts           slug / title / description
-      ExamPage.tsx      考試頁面
-      README.md         該考試專用規則
-test-raw-material/<slug>/   該考試的教材來源（只讀素材）
+      ExamPage.tsx      The exam page
+      README.md         Rules specific to this exam
+test-raw-material/<slug>/   Source material for that exam (read-only input)
 ```
-`src/routeTree.gen.ts` 為自動產生檔，需 commit，不要手改。
+`src/routeTree.gen.ts` is auto-generated. Commit it, never edit it by hand.
 
-## 新增考試的步驟
-1. `src/exams/<slug>/` 建立 `meta.ts`、`ExamPage.tsx`、`README.md`
-2. `src/routes/<slug>.tsx` 用 `createFileRoute('/<slug>')` 指向 `ExamPage`（autoCodeSplitting 會自動動態載入，不要在 root 或 index 靜態 import 考試頁面）
-3. 教材放 `test-raw-material/<slug>/`
-4. `/` 列表自動出現（來自 `meta.ts`），不需另外註冊
-5. 先讀該考試的 README.md 再動工
+## Adding a new exam
+1. Create `meta.ts`, `ExamPage.tsx`, `README.md` in `src/exams/<slug>/`
+2. Create `src/routes/<slug>.tsx` with `createFileRoute('/<slug>')` pointing to `ExamPage` (autoCodeSplitting loads it dynamically; never statically import exam pages from the root or index route)
+3. Put source material in `test-raw-material/<slug>/`
+4. The `/` list picks it up automatically from `meta.ts`; no extra registration
+5. Read the exam's README.md before starting work
 
-## 規則
-- **動態載入**：每個考試頁面必須是獨立 chunk，`/` 只能載入 `meta.ts`。
-- **個別考試規則**寫在 `src/exams/<slug>/README.md`，通用規則才寫在本檔。
-- **教材**（`test-raw-material/`）視為唯讀來源，不修改、不在網站上直接曝露既有答案。
-- 語言：介面與題目以繁體中文為主，程式碼識別字用英文。
-- 樣式只用 Tailwind utility classes。
+## Rules
+- **Dynamic loading**: every exam page must be its own chunk; `/` may only load `meta.ts` files.
+- **Per-exam rules** go in `src/exams/<slug>/README.md`; only project-wide rules go in this file.
+- **Source material** (`test-raw-material/`) is read-only: don't modify it, and don't expose its existing answers on the website.
+- **Language**: UI, questions, and docs are all in English.
+- **Styling**: Tailwind utility classes only.
 
-## 部署
-- GitHub Pages，base path `/kcis-test/`（`vite.config.ts` 的 `base`）。
-- 由 `.github/workflows/deploy.yml` 在 push 到 `main` 時自動 build 並部署。
-- SPA fallback：build 時複製 `index.html` → `404.html`，讓直接開子路由（如 `/kcis-test/formative-test-3`）可用。
-- repo 的 Settings → Pages → Source 必須設為 **GitHub Actions**。
+## Deployment
+- GitHub Pages, base path `/kcis-test/` (`base` in `vite.config.ts`).
+- `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
+- SPA fallback: the build copies `index.html` to `404.html`, so deep links (e.g. `/kcis-test/formative-test-3`) work. Direct loads of sub-routes return HTTP 404 but render fine; that is expected.
+- Repo Settings → Pages → Source must be **GitHub Actions** (already set).
+- Live site: https://rj-software-outsourcing.github.io/kcis-test/
 
-## Git 流程
-任務完成後直接 push 到 `main`，在 GitHub Pages 上驗證即可（不開 PR）。
+## Git workflow
+When a task is done, push straight to `main` and verify on GitHub Pages (no PRs).
 
-## 本機 push 注意
-此 repo 需用 `~/.ssh/id_ed25519`（身分 RJ-software-outsourcing）push；預設的 gravitysketch key 無寫入權限。已在本機 repo 設定 `core.sshCommand`（`git config core.sshCommand "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes"`），若 push 被拒先檢查這項。
+## Local push note
+Pushing requires `~/.ssh/id_ed25519` (identity RJ-software-outsourcing); the default gravitysketch key has no write access. The local repo is configured with `core.sshCommand` (`git config core.sshCommand "ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes"`). If a push is rejected, check that first.
