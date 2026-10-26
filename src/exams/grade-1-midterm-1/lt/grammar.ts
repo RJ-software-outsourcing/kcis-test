@@ -33,7 +33,6 @@ const nounKind = (word: string, answer: string): ChoiceItem => ({
 /** `optional`: words that may be tapped or not (e.g. "brick" in "red brick houses"). */
 const tap = (k: WordKind, text: string, answers: string[], hint = '', optional?: string[]) =>
   select(`Tap the ${k}${answers.length > 1 ? 's' : ''}.${hint ? ` ${hint}` : ''}`, text, answers, {
-    speak: true,
     optional,
   })
 

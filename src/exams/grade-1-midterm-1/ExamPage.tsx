@@ -37,7 +37,7 @@ const TRACKS: Track[] = [
 ]
 
 export default function ExamPage() {
-  const { track, mode, section, part, size, seed } = useSearch({ from: '/grade-1-midterm-1' })
+  const { track, mode, section, part, size, seed, pick } = useSearch({ from: '/grade-1-midterm-1' })
   const navigate = useNavigate({ from: '/grade-1-midterm-1' })
   const t = TRACKS.find((x) => x.id === track)
   if (!t) return <TrackPicker />
@@ -63,6 +63,8 @@ export default function ExamPage() {
       part={part}
       size={size}
       seed={seed}
+      pick={pick?.split(',')}
+      mixOnly
       back={{ label: '← IT / LT', onClick: () => navigate({ search: {} }) }}
       onNavigate={(n) =>
         navigate({
@@ -73,6 +75,7 @@ export default function ExamPage() {
             part: n.part || undefined,
             size: n.size,
             seed: n.seed,
+            pick: n.pick?.join(','),
           },
         })
       }

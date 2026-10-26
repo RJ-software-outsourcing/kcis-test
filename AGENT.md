@@ -29,6 +29,7 @@ src/
     types.ts            Item types (choice / match / write / predict / select / order) + defineSection()
     QuizExam.tsx        Section grid (grouped) + part-by-part section view
     MixedQuiz.tsx       Mixed review: N questions spread evenly over groups/sections/parts
+    MixPicker.tsx       Mixed review setup: tick sections (default all), pick a size
     questions.tsx       Question renderers
     HandwritingPad.tsx  Canvas for Apple Pencil / finger writing (palm rejection)
     progress.ts         Per-exam results in localStorage (every result also triggers a celebration)
@@ -56,7 +57,7 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 1. Read every image in `test-raw-material/<slug>/` (HEIC: convert with `sips -s format jpeg -Z 1600` into the scratchpad first).
 2. Write the spec in `src/exams/<slug>/README.md` (scope, sections, question types) and commit it **before** implementing.
 3. Implement the question banks in `src/exams/<slug>/data/` using the shared `components/quiz` types; the exam page just passes sections to `<QuizExam>`.
-4. Navigation uses search params (`?mode=extra&section=<id>&part=<n>`, `?mode=mixed&size=<n>&seed=<n>`) defined by `validateSearch` in the route file. `QuizExam` has three modes: workbook (parts with `source`, the default landing), extra practice (`mode=extra`, parts without `source`; the button only shows when such parts exist) and mixed review (`mode=mixed`).
+4. Navigation uses search params (`?mode=extra&section=<id>&part=<n>`, `?mode=mixed&size=<n>&seed=<n>`) defined by `validateSearch` in the route file. `QuizExam` has three modes: workbook (parts with `source`, the default landing), extra practice (`mode=extra`, parts without `source`; the button only shows when such parts exist) and mixed review (`mode=mixed`, with checkboxes to choose sections; `&pick=` ids). With `mixOnly`, sections without `readFirst` get no cards and are practiced only through the mixed test.
 5. Sections: set `group` (the study guide's category; cards are grouped by it and the mixed review balances over it) and, for story-bound sections, `readFirst` (+ optional `links`, e.g. a read-along video). `readFirst` sections are left out of the mixed review.
 
 ## Rules
@@ -67,6 +68,7 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 - **No spoilers on one page**: when a later question's text reveals an earlier answer (e.g. the next part of a prediction story), put it in a separate part.
 - **Answers come from the content, not the photos**: the child's handwritten answers in the photos may be wrong. Work out the correct answer yourself.
 - **Language**: UI, questions, and docs are all in English.
+- **🔊 Read-aloud only when needed**: the kids are practicing reading, so don't read questions, sentences or stories aloud. Set `speak` only when sound is the task (listen-and-pick, dictation, picture names in phonics).
 - **Styling**: Tailwind utility classes only. Font is Andika (designed for beginning readers).
 - **Target device**: iPad (portrait and landscape). Touch targets ≥ 48 px, text ≥ 20 px.
 - **Grade level**: questions must match the source workbook's difficulty (KCIS Grade 1 so far) and stay inside the test guide's scope.

@@ -69,8 +69,6 @@ export function speak(text: string) {
   window.speechSynthesis.speak(u)
 }
 
-/** Text for speech: blanks are read as "blank". */
-export const speakable = (text: string) => text.replace(/_{3,}/g, ' blank ')
 
 export function SpeakButton({ text, label }: { text: string; label?: string }) {
   return (

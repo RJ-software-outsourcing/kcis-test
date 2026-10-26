@@ -10,7 +10,7 @@ export interface ChoiceItem {
   picture?: string
   /** Shown after answering, e.g. the picture's name */
   reveal?: string
-  /** Text for the 🔊 button. Defaults to the prompt; set `noSpeak` to hide the button. */
+  /** Text for the 🔊 button (only when the question needs sound, e.g. listening or a picture name). */
   speak?: string
   noSpeak?: boolean
   /** Don't shuffle the options (e.g. Yes / No) */

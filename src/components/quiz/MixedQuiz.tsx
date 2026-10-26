@@ -24,11 +24,12 @@ export const mixableSections = (sections: Section[]) =>
     (s) => !s.readFirst && s.parts.some((p) => !p.aside && p.items.some(eligible)),
   )
 
+/** Number of questions a section adds to the mixed test. */
+export const sectionPoolSize = (s: Section) =>
+  s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter(eligible).length), 0)
+
 export const mixPoolSize = (sections: Section[]) =>
-  mixableSections(sections).reduce(
-    (n, s) => n + s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter(eligible).length), 0),
-    0,
-  )
+  mixableSections(sections).reduce((n, s) => n + sectionPoolSize(s), 0)
 
 /** Round-robin over the queues until `n` items are taken (or all queues are empty). */
 function roundRobin<T>(queues: T[][], n: number): T[] {

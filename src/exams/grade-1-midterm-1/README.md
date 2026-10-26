@@ -22,14 +22,14 @@ The scope comes from the two study guides in `test-guide/` (`it-guide.jpg`, `lt-
 ## Two tracks, one page
 `/grade-1-midterm-1` first shows a picker (LT / IT, with test dates). Each track is its own `QuizExam` with its own progress (`grade-1-midterm-1-it`, `grade-1-midterm-1-lt` in localStorage).
 
-Inside a track, section cards are grouped by the study guide's categories:
-- IT: **Foundational Skills** (phonics + My Words to Know), **Vocabulary**; LT: **Vocabulary**, **Grammar**. These don't depend on a story.
-- **📖 Reading** — one section per story. Each has `readFirst` (myView pages): the card and the first part say "Read the story first", with a 🎧 link to the story's read-along video from [MyViewReview](https://myviewreview.com/grade1/u1-my-neighborhood) (the KCIS teachers' review site). The child reads the story in myView, then answers.
+Inside a track (`mixOnly`):
+- **🔀 Mixed test** at the top — everything that doesn't need a story: IT **Foundational Skills** (phonics + My Words to Know) and **Vocabulary**; LT **Vocabulary** and **Grammar**. These are not offered as separate section tests (the parent found that unnecessary); the sections only appear as checkboxes in the mixed test.
+- **📖 Reading** — section cards, one per story. Each has `readFirst` (myView pages): the card and the first part say "Read the story first", with a 🎧 link to the story's read-along video from [MyViewReview](https://myviewreview.com/grade1/u1-my-neighborhood) (the KCIS teachers' review site). The child reads the story in myView, then answers.
 
-## 🔀 Mixed review
-Below the sections: "Mixed review" with a size picker (10 / 20 / 30 / 50 / All).
-- Uses every section **without** `readFirst` (no story needed).
-- Questions are spread as evenly as possible: round-robin over the categories (section `group`), inside a category over its sections, inside a section over its parts; then shuffled. E.g. LT 20 → 10 vocabulary + 10 grammar. The seed is in the URL (`?mode=mixed&size=20&seed=…`), so a reload keeps the same set.
+## 🔀 Mixed test
+"Mixed test" panel: checkboxes per category and per section (number of questions next to each), **all ticked by default**, then a size picker (10 / 20 / 30 / 50 / All N of the ticked ones).
+- Uses the ticked sections **without** `readFirst` (no story needed). What was unticked is remembered per track (`kcis:<exam>:mix-excluded` in localStorage); the chosen ids go in the URL (`&pick=short-a,short-i,…`, omitted when everything is ticked).
+- Questions are spread as evenly as possible: round-robin over the categories (section `group`), inside a category over its sections, inside a section over its parts; then shuffled. E.g. LT 20 → 10 vocabulary + 10 grammar. The seed is in the URL (`?mode=mixed&size=20&seed=…&pick=…`), so a reload keeps the same set.
 - Auto-checkable items and handwriting items with a model answer; open-ended items are left out.
 - One question at a time, its directions and section shown above it; numbered dots (green/red) to jump around; score at the end; "New mix".
 - After a correct answer it moves on by itself after 3 s (countdown in the Next button). Coming back to an answered question does not auto-advance.
@@ -97,6 +97,9 @@ Helpers for this exam: `helpers.ts` (`choice`, `pic`, `yesNo`, `listen`, `write`
 
 ## Pictures
 Emoji only, and only when they clearly name the word. When the emoji could be read two ways, `pic()` shows the word after answering, and 🔊 says the picture name (never the answer to a "which word names this picture" item).
+
+## 🔊 Only when the question needs it
+To train reading, questions, sentences and stories are **not** read aloud. 🔊 appears only where sound is the task: listen-and-pick, dictation, picture names in phonics (middle sound, beginning sound, "does it have short a?"), and myView p.224 ("point to the words as you listen").
 
 ## Difficulty
 KCIS Grade 1, exactly the workbook's level. 2–4 options per question, as on the page.

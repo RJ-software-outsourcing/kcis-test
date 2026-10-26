@@ -11,7 +11,7 @@ import type {
   SelectItem,
   WriteItem,
 } from './types'
-import { Btn, Card, SpeakButton, WithBlanks, shuffle, speakable } from './util'
+import { Btn, Card, SpeakButton, WithBlanks, shuffle } from './util'
 
 type WithId<T> = T & { id: string }
 
@@ -48,9 +48,8 @@ function Choice({ item, number }: { item: WithId<ChoiceItem>; number: number }) 
   )
   const correct = picked === item.answer
   const praise = useMemo(() => pickPraise(), [picked])
-  const speakText = item.noSpeak
-    ? undefined
-    : (item.speak ?? (item.prompt && speakable(item.prompt)))
+  // Only items that need sound (listening, picture names) get 🔊; the child reads the rest.
+  const speakText = item.noSpeak ? undefined : item.speak
 
   const pick = (o: string) => {
     if (picked) return
@@ -326,7 +325,6 @@ function StoryBox({ text, tone }: { text: string; tone: 'before' | 'after' }) {
       className={`flex items-start gap-3 rounded-xl p-4 ${tone === 'before' ? 'bg-amber-50' : 'bg-sky-50'}`}
     >
       <p className="flex-1 text-2xl leading-relaxed">{text}</p>
-      <SpeakButton text={text} />
     </div>
   )
 }
@@ -335,7 +333,6 @@ function PredictQuestion({ text }: { text: string }) {
   return (
     <div className="mt-4 flex items-start gap-3">
       <p className="flex-1 text-2xl font-semibold">🔮 {text}</p>
-      <SpeakButton text={text} />
     </div>
   )
 }

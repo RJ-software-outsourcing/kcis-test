@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { CelebrationHost } from '../celebrate'
 import { clearPads } from './HandwritingPad'
-import { MIX_SIZES, MixedQuiz, clearMix, mixPoolSize } from './MixedQuiz'
+import { MixPicker } from './MixPicker'
+import { MixedQuiz, clearMix } from './MixedQuiz'
 import { ExamIdContext, useProgress } from './progress'
 import { Question } from './questions'
 import type { Section } from './types'
@@ -22,6 +23,8 @@ export interface ExamNav {
   /** Mixed review: number of questions and the seed that picked them */
   size?: number
   seed?: number
+  /** Mixed review: the sections to draw from (undefined = all) */
+  pick?: string[]
 }
 
 export interface QuizExamProps {
@@ -34,6 +37,12 @@ export interface QuizExamProps {
   part?: number
   size?: number
   seed?: number
+  pick?: string[]
+  /**
+   * Sections without `readFirst` are practiced only through the mixed test
+   * (no section cards for them); story sections keep their cards.
+   */
+  mixOnly?: boolean
   /** Replaces the "← All exams" link (e.g. to go back to a track picker) */
   back?: { label: string; onClick: () => void }
   onNavigate: (nav: ExamNav) => void
@@ -65,6 +74,8 @@ function Inner({
   part = 0,
   size,
   seed,
+  pick,
+  mixOnly,
   back,
   onNavigate,
 }: QuizExamProps) {
@@ -77,18 +88,18 @@ function Inner({
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [mode, sectionId, part])
-  const startMix = (n: number) => {
+  const startMix = (n: number, only?: string[]) => {
     clearMix(clear)
-    onNavigate({ mode: 'mixed', size: n, seed: Math.floor(Math.random() * 1e9) })
+    onNavigate({ mode: 'mixed', size: n, seed: Math.floor(Math.random() * 1e9), pick: only })
   }
   if (mode === 'mixed' && size && seed !== undefined)
     return (
       <MixedQuiz
-        sections={sections}
+        sections={pick ? sections.filter((s) => pick.includes(s.id)) : sections}
         size={size}
         seed={seed}
         onExit={() => onNavigate({})}
-        onNew={() => startMix(size)}
+        onNew={() => startMix(size, pick)}
       />
     )
   if (idx < 0)
@@ -98,9 +109,10 @@ function Inner({
         intro={intro}
         mode={mode}
         sections={mode === 'mixed' ? workbook : list}
+        allSections={sections}
         workbook={workbook}
         hasExtra={extra.length > 0}
-        mixPool={mixPoolSize(sections)}
+        mixOnly={mixOnly}
         back={back}
         onStartMix={startMix}
         onNavigate={onNavigate}
@@ -136,24 +148,34 @@ function Landing({
   intro,
   mode,
   sections,
+  allSections,
   workbook,
   hasExtra,
-  mixPool,
+  mixOnly,
   back,
   onStartMix,
   onNavigate,
 }: Pick<QuizExamProps, 'title' | 'intro' | 'back' | 'onNavigate'> & {
   mode: Mode
   sections: Section[]
+  allSections: Section[]
   workbook: Section[]
   hasExtra: boolean
-  mixPool: number
-  onStartMix: (n: number) => void
+  mixOnly?: boolean
+  onStartMix: (n: number, pick?: string[]) => void
 }) {
   const { clear } = useProgress()
-  const wb = useStats('', workbook.flatMap(itemIds))
   const sectionMode = mode === 'extra' ? 'extra' : 'workbook'
-  const groups = sections.reduce<{ name?: string; sections: Section[] }[]>((acc, s) => {
+  const cards = mixOnly ? sections.filter((s) => s.readFirst) : sections
+  const wb = useStats('', (mixOnly ? cards : workbook).flatMap(itemIds))
+  const picker = sectionMode === 'workbook' && (
+    <MixPicker
+      sections={allSections}
+      title={mixOnly ? 'Mixed test' : 'Mixed review'}
+      onStart={onStartMix}
+    />
+  )
+  const groups = cards.reduce<{ name?: string; sections: Section[] }[]>((acc, s) => {
     const last = acc[acc.length - 1]
     if (last && last.name === s.group) last.sections.push(s)
     else acc.push({ name: s.group, sections: [s] })
@@ -173,7 +195,9 @@ function Landing({
       <h1 className="mt-2 text-4xl font-bold">{title}</h1>
       {intro && <div className="mt-3 text-xl text-slate-700">{intro}</div>}
 
-      {sectionMode === 'workbook' ? (
+      {mixOnly && picker}
+
+      {mixOnly ? null : sectionMode === 'workbook' ? (
         <div className="mt-6 rounded-2xl bg-amber-50 p-4">
           <h2 className="text-2xl font-bold text-amber-900">📘 Workbook review</h2>
           <p className="text-lg text-amber-900/80">
@@ -205,30 +229,7 @@ function Landing({
         </section>
       ))}
 
-      {sectionMode === 'workbook' && mixPool > 0 && (
-        <div className="mt-8 rounded-2xl border-2 border-violet-200 bg-violet-50 p-5">
-          <div className="flex items-center gap-4">
-            <span className="text-5xl">🔀</span>
-            <span className="flex-1">
-              <span className="block text-2xl font-bold text-violet-900">Mixed review</span>
-              <span className="block text-lg text-violet-900/80">
-                Questions from every part that doesn't need the myView story, all mixed up. How
-                many questions?
-              </span>
-            </span>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {MIX_SIZES.filter((n) => n < mixPool).map((n) => (
-              <Btn key={n} tone="primary" onClick={() => onStartMix(n)}>
-                {n}
-              </Btn>
-            ))}
-            <Btn tone="primary" onClick={() => onStartMix(mixPool)}>
-              All {mixPool}
-            </Btn>
-          </div>
-        </div>
-      )}
+      {!mixOnly && picker}
 
       {sectionMode === 'workbook' && hasExtra && (
         <button

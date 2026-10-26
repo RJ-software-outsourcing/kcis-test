@@ -7,6 +7,8 @@ interface Search {
   part?: number
   size?: number
   seed?: number
+  /** Mixed review: comma-separated section ids */
+  pick?: string
 }
 
 // autoCodeSplitting (vite.config.ts) lazy-loads this component per route.
@@ -17,6 +19,7 @@ export const Route = createFileRoute('/formative-test-3')({
     part: typeof s.part === 'number' ? s.part : undefined,
     size: typeof s.size === 'number' ? s.size : undefined,
     seed: typeof s.seed === 'number' ? s.seed : undefined,
+    pick: typeof s.pick === 'string' && s.pick ? s.pick : undefined,
   }),
   component: ExamPage,
 })
