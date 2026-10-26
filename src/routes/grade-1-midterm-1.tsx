@@ -10,6 +10,8 @@ interface Search {
   seed?: number
   /** Mixed review: comma-separated section ids */
   pick?: string
+  /** Mixed review: include open writing/drawing tasks */
+  open?: boolean
 }
 
 // autoCodeSplitting (vite.config.ts) lazy-loads this component per route.
@@ -22,6 +24,7 @@ export const Route = createFileRoute('/grade-1-midterm-1')({
     size: typeof s.size === 'number' ? s.size : undefined,
     seed: typeof s.seed === 'number' ? s.seed : undefined,
     pick: typeof s.pick === 'string' && s.pick ? s.pick : undefined,
+    open: s.open === true ? true : undefined,
   }),
   component: ExamPage,
 })

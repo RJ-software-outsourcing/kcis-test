@@ -30,7 +30,7 @@ Inside a track (`mixOnly`):
 "Mixed test" panel: checkboxes per category and per section (number of questions next to each), **all ticked by default**, then a size picker (10 / 20 / 30 / 50 / All N of the ticked ones).
 - Uses the ticked sections **without** `readFirst` (no story needed). What was unticked is remembered per track (`kcis:<exam>:mix-excluded` in localStorage); the chosen ids go in the URL (`&pick=short-a,short-i,…`, omitted when everything is ticked).
 - Questions are spread as evenly as possible: round-robin over the categories (section `group`), inside a category over its sections, inside a section over its parts; then shuffled. E.g. LT 20 → 10 vocabulary + 10 grammar. The seed is in the URL (`?mode=mixed&size=20&seed=…&pick=…`), so a reload keeps the same set.
-- Auto-checkable items and handwriting items with a model answer; open-ended items are left out.
+- Auto-checkable items and handwriting items with a model answer. Open writing/drawing tasks (no answer key, e.g. "make a sentence with a vocabulary word and draw a picture") are included only when **✍️ Writing & drawing** is ticked — unticked by default, remembered per track (`kcis:<exam>:mix-open`), `&open=true` in the URL. They are marked with "Done".
 - One question at a time, its directions and section shown above it; numbered dots (green/red) to jump around; score at the end; "New mix".
 - After a correct answer it moves on by itself after 3 s (countdown in the Next button). Coming back to an answered question does not auto-advance.
 - Results are stored under `mix/…` ids, separate from the workbook progress, and cleared when a new mix starts.

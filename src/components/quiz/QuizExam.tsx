@@ -25,6 +25,8 @@ export interface ExamNav {
   seed?: number
   /** Mixed review: the sections to draw from (undefined = all) */
   pick?: string[]
+  /** Mixed review: also include open writing/drawing tasks */
+  open?: boolean
 }
 
 export interface QuizExamProps {
@@ -38,6 +40,7 @@ export interface QuizExamProps {
   size?: number
   seed?: number
   pick?: string[]
+  open?: boolean
   /**
    * Sections without `readFirst` are practiced only through the mixed test
    * (no section cards for them); story sections keep their cards.
@@ -75,6 +78,7 @@ function Inner({
   size,
   seed,
   pick,
+  open,
   mixOnly,
   back,
   onNavigate,
@@ -88,9 +92,15 @@ function Inner({
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [mode, sectionId, part])
-  const startMix = (n: number, only?: string[]) => {
+  const startMix = (n: number, only?: string[], withOpen?: boolean) => {
     clearMix(clear)
-    onNavigate({ mode: 'mixed', size: n, seed: Math.floor(Math.random() * 1e9), pick: only })
+    onNavigate({
+      mode: 'mixed',
+      size: n,
+      seed: Math.floor(Math.random() * 1e9),
+      pick: only,
+      open: withOpen || undefined,
+    })
   }
   if (mode === 'mixed' && size && seed !== undefined)
     return (
@@ -98,8 +108,10 @@ function Inner({
         sections={pick ? sections.filter((s) => pick.includes(s.id)) : sections}
         size={size}
         seed={seed}
+        open={open}
+        title={mixOnly ? 'Mixed test' : 'Mixed review'}
         onExit={() => onNavigate({})}
-        onNew={() => startMix(size, pick)}
+        onNew={() => startMix(size, pick, open)}
       />
     )
   if (idx < 0)
@@ -162,7 +174,7 @@ function Landing({
   workbook: Section[]
   hasExtra: boolean
   mixOnly?: boolean
-  onStartMix: (n: number, pick?: string[]) => void
+  onStartMix: (n: number, pick?: string[], open?: boolean) => void
 }) {
   const { clear } = useProgress()
   const sectionMode = mode === 'extra' ? 'extra' : 'workbook'

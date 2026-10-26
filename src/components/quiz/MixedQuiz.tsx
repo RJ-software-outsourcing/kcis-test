@@ -16,20 +16,35 @@ interface MixItem {
   section: Section
 }
 
-/** Items that make sense on their own: auto-checked or with an answer to self-check against. */
-const eligible = (it: Item) => it.kind !== 'predict' && (it.kind !== 'write' || !!it.answer)
+/** An open task: handwriting or drawing with no answer to check against ("Done"). */
+const isOpen = (it: Item) => it.kind === 'write' && !it.answer
 
-export const mixableSections = (sections: Section[]) =>
+/**
+ * Items that make sense on their own: auto-checked or with an answer to self-check
+ * against; open writing/drawing tasks only when `open` is set.
+ */
+const eligible = (it: Item, open = false) => it.kind !== 'predict' && (open || !isOpen(it))
+
+export const mixableSections = (sections: Section[], open = false) =>
   sections.filter(
-    (s) => !s.readFirst && s.parts.some((p) => !p.aside && p.items.some(eligible)),
+    (s) => !s.readFirst && s.parts.some((p) => !p.aside && p.items.some((i) => eligible(i, open))),
   )
 
 /** Number of questions a section adds to the mixed test. */
-export const sectionPoolSize = (s: Section) =>
-  s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter(eligible).length), 0)
+export const sectionPoolSize = (s: Section, open = false) =>
+  s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter((i) => eligible(i, open)).length), 0)
 
-export const mixPoolSize = (sections: Section[]) =>
-  mixableSections(sections).reduce((n, s) => n + sectionPoolSize(s), 0)
+/** Number of open writing/drawing tasks in the sections that can be mixed. */
+export const openTaskCount = (sections: Section[]) =>
+  sectionsWithoutStory(sections).reduce(
+    (n, s) => n + s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter(isOpen).length), 0),
+    0,
+  )
+
+const sectionsWithoutStory = (sections: Section[]) => sections.filter((s) => !s.readFirst)
+
+export const mixPoolSize = (sections: Section[], open = false) =>
+  mixableSections(sections, open).reduce((n, s) => n + sectionPoolSize(s, open), 0)
 
 /** Round-robin over the queues until `n` items are taken (or all queues are empty). */
 function roundRobin<T>(queues: T[][], n: number): T[] {
@@ -45,14 +60,16 @@ function roundRobin<T>(queues: T[][], n: number): T[] {
  * categories), inside a group over its sections, and inside a section over its parts.
  * The same seed always gives the same questions.
  */
-export function pickMix(sections: Section[], n: number, seed: number): MixItem[] {
+export function pickMix(sections: Section[], n: number, seed: number, open = false): MixItem[] {
   const random = seededRandom(seed)
   const perSection = (section: Section) => {
     const parts = section.parts
       .filter((p) => !p.aside)
       .map((p) =>
         shuffle(
-          p.items.filter(eligible).map((item) => ({ item, directions: p.title, section })),
+          p.items
+            .filter((i) => eligible(i, open))
+            .map((item) => ({ item, directions: p.title, section })),
           random,
         ),
       )
@@ -60,7 +77,7 @@ export function pickMix(sections: Section[], n: number, seed: number): MixItem[]
     return roundRobin(shuffle(parts, random), Infinity)
   }
   const groups = new Map<string, Section[]>()
-  for (const s of mixableSections(sections)) {
+  for (const s of mixableSections(sections, open)) {
     const key = s.group ?? s.id
     groups.set(key, [...(groups.get(key) ?? []), s])
   }
@@ -83,17 +100,25 @@ export function MixedQuiz({
   sections,
   size,
   seed,
+  open,
+  title = 'Mixed review',
   onExit,
   onNew,
 }: {
   sections: Section[]
   size: number
   seed: number
+  /** Also include open writing/drawing tasks */
+  open?: boolean
+  title?: string
   onExit: () => void
   onNew: () => void
 }) {
   const { progress } = useProgress()
-  const items = useMemo(() => pickMix(sections, size, seed), [sections, size, seed])
+  const items = useMemo(
+    () => pickMix(sections, size, seed, open),
+    [sections, size, seed, open],
+  )
   const [index, setIndex] = useState(0)
   const [showResults, setShowResults] = useState(false)
   useEffect(() => {
@@ -140,7 +165,7 @@ export function MixedQuiz({
       <header className="sticky top-0 z-10 -mx-4 border-b border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-3">
           <Btn onClick={onExit}>← Back</Btn>
-          <h1 className="flex-1 truncate text-2xl font-bold">🔀 Mixed review</h1>
+          <h1 className="flex-1 truncate text-2xl font-bold">🔀 {title}</h1>
           <span className="text-lg text-slate-600">
             {good}/{items.length}
           </span>

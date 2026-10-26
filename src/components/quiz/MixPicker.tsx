@@ -1,12 +1,21 @@
 import { useContext, useState } from 'react'
 import type { ReactNode } from 'react'
-import { MIX_SIZES, mixPoolSize, mixableSections, sectionPoolSize } from './MixedQuiz'
+import { MIX_SIZES, mixPoolSize, mixableSections, openTaskCount, sectionPoolSize } from './MixedQuiz'
 import { ExamIdContext } from './progress'
 import type { Section } from './types'
 import { Btn } from './util'
 
 // Remembers what was left out (not what was picked), so new sections start included.
 const storageKey = (examId: string) => `kcis:${examId}:mix-excluded`
+const openKey = (examId: string) => `kcis:${examId}:mix-open`
+
+function store(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // storage unavailable — the choice lasts for this visit only
+  }
+}
 
 function loadExcluded(examId: string): Set<string> {
   try {
@@ -18,7 +27,8 @@ function loadExcluded(examId: string): Set<string> {
 
 /**
  * Mixed test setup: tick what to include (everything by default), then pick how many
- * questions. `onStart` gets the size and the chosen section ids (undefined = all).
+ * questions. `onStart` gets the size, the chosen section ids (undefined = all) and
+ * whether open writing/drawing tasks are included (off by default).
  */
 export function MixPicker({
   sections,
@@ -27,21 +37,25 @@ export function MixPicker({
 }: {
   sections: Section[]
   title: string
-  onStart: (size: number, pick?: string[]) => void
+  onStart: (size: number, pick?: string[], open?: boolean) => void
 }) {
   const examId = useContext(ExamIdContext)
-  const all = mixableSections(sections)
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(openKey(examId)) === '1'
+    } catch {
+      return false
+    }
+  })
+  const all = mixableSections(sections, true)
+  const openTasks = openTaskCount(all)
   const [excluded, setExcluded] = useState(() => loadExcluded(examId))
   const save = (next: Set<string>) => {
     setExcluded(next)
-    try {
-      localStorage.setItem(storageKey(examId), JSON.stringify([...next]))
-    } catch {
-      // storage unavailable — the choice lasts for this visit only
-    }
+    store(storageKey(examId), JSON.stringify([...next]))
   }
   const picked = all.filter((s) => !excluded.has(s.id))
-  const pool = mixPoolSize(picked)
+  const pool = mixPoolSize(picked, open)
   const groups = all.reduce<{ name?: string; sections: Section[] }[]>((acc, s) => {
     const g = acc.find((x) => x.name === s.group)
     if (g) g.sections.push(s)
@@ -58,7 +72,7 @@ export function MixPicker({
     save(next)
   }
   const start = (n: number) =>
-    onStart(n, picked.length === all.length ? undefined : picked.map((s) => s.id))
+    onStart(n, picked.length === all.length ? undefined : picked.map((s) => s.id), open)
 
   if (!all.length) return null
   return (
@@ -99,13 +113,34 @@ export function MixPicker({
                   <span className="flex-1">
                     {s.emoji} {s.title}
                   </span>
-                  <span className="text-base text-slate-500">{sectionPoolSize(s)}</span>
+                  <span className="text-base text-slate-500">{sectionPoolSize(s, open)}</span>
                 </Check>
               ))}
             </div>
           </div>
         )
       })}
+
+      {openTasks > 0 && (
+        <div className="mt-5">
+          <Check
+            checked={open}
+            onChange={(v) => {
+              setOpen(v)
+              store(openKey(examId), v ? '1' : '0')
+            }}
+            className="rounded-xl bg-white px-3 text-lg"
+          >
+            <span className="flex-1">
+              ✍️ Writing &amp; drawing
+              <span className="block text-base text-slate-500">
+                Open tasks with no answer key (write a sentence, draw a picture). Tap Done when
+                finished.
+              </span>
+            </span>
+          </Check>
+        </div>
+      )}
 
       <p className="mt-5 text-lg font-semibold text-violet-900">How many questions?</p>
       <div className="mt-2 flex flex-wrap gap-3">

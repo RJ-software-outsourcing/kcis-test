@@ -29,7 +29,7 @@ src/
     types.ts            Item types (choice / match / write / predict / select / order) + defineSection()
     QuizExam.tsx        Section grid (grouped) + part-by-part section view
     MixedQuiz.tsx       Mixed review: N questions spread evenly over groups/sections/parts
-    MixPicker.tsx       Mixed review setup: tick sections (default all), pick a size
+    MixPicker.tsx       Mixed review setup: tick sections (default all), optional open writing/drawing tasks, pick a size
     questions.tsx       Question renderers
     HandwritingPad.tsx  Canvas for Apple Pencil / finger writing (palm rejection)
     progress.ts         Per-exam results in localStorage (every result also triggers a celebration)
