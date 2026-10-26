@@ -20,6 +20,7 @@ export const reading = defineSection({
   id: 'reading',
   title: 'Making a Map',
   subtitle: 'Reading comprehension · steps in order',
+  readFirst: 'myView 1.1 p.186–203',
   emoji: '📖',
   parts: [
     {

@@ -1,7 +1,16 @@
 import { useMemo, useState } from 'react'
+import { pickPraise } from '../celebrate'
 import { HandwritingPad } from './HandwritingPad'
 import { useProgress } from './progress'
-import type { ChoiceItem, Item, MatchItem, PredictItem, WriteItem } from './types'
+import type {
+  ChoiceItem,
+  Item,
+  MatchItem,
+  OrderItem,
+  PredictItem,
+  SelectItem,
+  WriteItem,
+} from './types'
 import { Btn, Card, SpeakButton, WithBlanks, shuffle, speakable } from './util'
 
 type WithId<T> = T & { id: string }
@@ -16,6 +25,10 @@ export function Question({ item, number }: { item: Item; number: number }) {
       return <Write item={item} number={number} />
     case 'predict':
       return <Predict item={item} number={number} />
+    case 'select':
+      return <Select item={item} number={number} />
+    case 'order':
+      return <Order item={item} number={number} />
   }
 }
 
@@ -34,6 +47,7 @@ function Choice({ item, number }: { item: WithId<ChoiceItem>; number: number }) 
     progress[item.id] === 'correct' ? item.answer : null,
   )
   const correct = picked === item.answer
+  const praise = useMemo(() => pickPraise(), [picked])
   const speakText = item.noSpeak
     ? undefined
     : (item.speak ?? (item.prompt && speakable(item.prompt)))
@@ -86,7 +100,7 @@ function Choice({ item, number }: { item: WithId<ChoiceItem>; number: number }) 
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xl">
           {correct ? (
             <span className="font-semibold text-emerald-700">
-              ✅ Great job!{item.reveal && <> — {item.reveal}</>}
+              🎉 {praise}{item.reveal && <> — {item.reveal}</>}
             </span>
           ) : (
             <>
@@ -439,6 +453,189 @@ function PredictWrite({ item, number }: { item: WithId<PredictItem>; number: num
           </div>
         </>
       )}
+    </Card>
+  )
+}
+
+const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9']/g, '')
+
+function Select({ item, number }: { item: WithId<SelectItem>; number: number }) {
+  const { progress, setResult } = useProgress()
+  const tokens = useMemo(() => item.text.split(/\s+/), [item])
+  const targets = useMemo(() => new Set(item.answers.map(norm)), [item])
+  const isTarget = (i: number) => targets.has(norm(tokens[i]))
+  const done = progress[item.id] === 'correct'
+  const [picked, setPicked] = useState<Set<number>>(
+    () => new Set(done ? tokens.map((_, i) => i).filter(isTarget) : []),
+  )
+  const [checked, setChecked] = useState(done)
+  const allRight = tokens.every((_, i) => picked.has(i) === isTarget(i))
+
+  const toggle = (i: number) => {
+    if (checked) return
+    const next = new Set(picked)
+    if (next.has(i)) next.delete(i)
+    else next.add(i)
+    setPicked(next)
+  }
+
+  return (
+    <Card number={number} result={checked ? (allRight ? 'correct' : 'wrong') : undefined}>
+      {item.prompt && (
+        <div className="flex items-start gap-3">
+          <p className="flex-1 text-xl font-semibold text-slate-700">{item.prompt}</p>
+          {item.speak && <SpeakButton text={item.text} />}
+        </div>
+      )}
+      <p className="mt-3 flex flex-wrap gap-2 text-2xl leading-relaxed">
+        {tokens.map((t, i) => {
+          const on = picked.has(i)
+          const tone = !checked
+            ? on
+              ? 'border-indigo-600 bg-indigo-100'
+              : 'border-transparent bg-slate-50'
+            : on && isTarget(i)
+              ? 'border-emerald-500 bg-emerald-100'
+              : on
+                ? 'border-rose-500 bg-rose-100'
+                : isTarget(i) && !allRight
+                  ? 'border-dashed border-amber-500'
+                  : 'border-transparent'
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => toggle(i)}
+              className={`min-h-12 rounded-lg border-2 px-2 ${tone}`}
+            >
+              {t}
+            </button>
+          )
+        })}
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xl">
+        {!checked && (
+          <Btn
+            tone="primary"
+            disabled={!picked.size}
+            onClick={() => {
+              setChecked(true)
+              setResult(item.id, allRight ? 'correct' : 'wrong')
+            }}
+          >
+            Check
+          </Btn>
+        )}
+        {checked && allRight && <span className="font-semibold text-emerald-700">✅ All correct!</span>}
+        {checked && !allRight && (
+          <>
+            <span className="font-semibold text-rose-700">❌ Not yet.</span>
+            <Btn
+              tone="bad"
+              onClick={() => {
+                setPicked(new Set([...picked].filter(isTarget)))
+                setChecked(false)
+                setResult(item.id, undefined)
+              }}
+            >
+              ↺ Try again
+            </Btn>
+          </>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+function Order({ item, number }: { item: WithId<OrderItem>; number: number }) {
+  const { progress, setResult } = useProgress()
+  // Pieces are tracked by index, so repeated words (e.g. "the") still work.
+  const pool = useMemo(() => shuffle(item.pieces.map((_, i) => i)), [item])
+  const done = progress[item.id] === 'correct'
+  const [order, setOrder] = useState<number[]>(() => (done ? item.pieces.map((_, i) => i) : []))
+  const [checked, setChecked] = useState(done)
+  const text = (i: number) => item.pieces[i]
+  const allRight = order.every((p, i) => text(p) === item.pieces[i])
+  const full = order.length === item.pieces.length
+  const v = item.vertical
+
+  const piece = (i: number, onClick: () => void, tone: string) => (
+    <button
+      key={i}
+      type="button"
+      onClick={onClick}
+      className={`min-h-12 rounded-xl border-2 px-3 py-2 text-left text-2xl ${tone} ${v ? 'w-full' : ''}`}
+    >
+      {text(i)}
+    </button>
+  )
+
+  return (
+    <Card number={number} result={checked ? (allRight ? 'correct' : 'wrong') : undefined}>
+      {item.prompt && <p className="text-xl font-semibold text-slate-700">{item.prompt}</p>}
+      <div
+        className={`mt-3 flex min-h-16 gap-2 rounded-xl border-2 border-dashed border-slate-300 p-2 ${
+          v ? 'flex-col' : 'flex-wrap'
+        }`}
+      >
+        {order.length === 0 && (
+          <span className="self-center px-2 text-lg text-slate-400">Tap the pieces below in order.</span>
+        )}
+        {order.map((p, i) => (
+          <div key={p} className={`flex items-center gap-2 ${v ? '' : 'contents'}`}>
+            {v && <span className="w-8 text-xl font-bold text-slate-500">{i + 1}.</span>}
+            {piece(
+              p,
+              () => !checked && setOrder(order.filter((x) => x !== p)),
+              checked
+                ? text(p) === item.pieces[i]
+                  ? 'border-emerald-500 bg-emerald-50'
+                  : 'border-rose-500 bg-rose-50'
+                : 'border-indigo-400 bg-indigo-50',
+            )}
+          </div>
+        ))}
+      </div>
+      {!checked && (
+        <div className={`mt-3 flex gap-2 ${v ? 'flex-col' : 'flex-wrap'}`}>
+          {pool
+            .filter((p) => !order.includes(p))
+            .map((p) => piece(p, () => setOrder([...order, p]), 'border-slate-300 bg-white'))}
+        </div>
+      )}
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xl">
+        {!checked && (
+          <Btn
+            tone="primary"
+            disabled={!full}
+            onClick={() => {
+              setChecked(true)
+              setResult(item.id, allRight ? 'correct' : 'wrong')
+            }}
+          >
+            Check
+          </Btn>
+        )}
+        {!checked && order.length > 0 && <Btn onClick={() => setOrder([])}>Clear</Btn>}
+        {checked && allRight && <span className="font-semibold text-emerald-700">✅ All correct!</span>}
+        {checked && !allRight && (
+          <>
+            <span className="font-semibold text-rose-700">❌ Not yet.</span>
+            <Btn
+              tone="bad"
+              onClick={() => {
+                // Keep the correct beginning, return the rest to the pool.
+                const keep = order.findIndex((p, i) => text(p) !== item.pieces[i])
+                setOrder(order.slice(0, keep))
+                setChecked(false)
+                setResult(item.id, undefined)
+              }}
+            >
+              ↺ Try again
+            </Btn>
+          </>
+        )}
+      </div>
     </Card>
   )
 }

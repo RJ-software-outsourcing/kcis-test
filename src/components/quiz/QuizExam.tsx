@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { CelebrationHost } from '../celebrate'
 import { clearPads } from './HandwritingPad'
+import { MIX_SIZES, MixedQuiz, clearMix, mixPoolSize } from './MixedQuiz'
 import { ExamIdContext, useProgress } from './progress'
 import { Question } from './questions'
 import type { Section } from './types'
@@ -11,12 +13,15 @@ import { Btn } from './util'
  * Parts with a `source` (workbook questions) form the default "workbook" mode;
  * parts without one are shown separately under "extra" practice.
  */
-export type Mode = 'workbook' | 'extra'
+export type Mode = 'workbook' | 'extra' | 'mixed'
 
 export interface ExamNav {
   mode?: Mode
   section?: string
   part?: number
+  /** Mixed review: number of questions and the seed that picked them */
+  size?: number
+  seed?: number
 }
 
 export interface QuizExamProps {
@@ -27,6 +32,10 @@ export interface QuizExamProps {
   mode?: Mode
   sectionId?: string
   part?: number
+  size?: number
+  seed?: number
+  /** Replaces the "← All exams" link (e.g. to go back to a track picker) */
+  back?: { label: string; onClick: () => void }
   onNavigate: (nav: ExamNav) => void
 }
 
@@ -42,6 +51,7 @@ export function QuizExam(props: QuizExamProps) {
   return (
     <ExamIdContext.Provider value={props.examId}>
       <Inner {...props} />
+      <CelebrationHost />
     </ExamIdContext.Provider>
   )
 }
@@ -53,8 +63,12 @@ function Inner({
   mode = 'workbook',
   sectionId,
   part = 0,
+  size,
+  seed,
+  back,
   onNavigate,
 }: QuizExamProps) {
+  const { clear } = useProgress()
   const workbook = useMemo(() => filterMode(sections, 'workbook'), [sections])
   const extra = useMemo(() => filterMode(sections, 'extra'), [sections])
   const list = mode === 'extra' ? extra : workbook
@@ -63,14 +77,32 @@ function Inner({
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [mode, sectionId, part])
+  const startMix = (n: number) => {
+    clearMix(clear)
+    onNavigate({ mode: 'mixed', size: n, seed: Math.floor(Math.random() * 1e9) })
+  }
+  if (mode === 'mixed' && size && seed !== undefined)
+    return (
+      <MixedQuiz
+        sections={sections}
+        size={size}
+        seed={seed}
+        onExit={() => onNavigate({})}
+        onNew={() => startMix(size)}
+      />
+    )
   if (idx < 0)
     return (
       <Landing
         title={title}
         intro={intro}
         mode={mode}
-        sections={list}
+        sections={mode === 'mixed' ? workbook : list}
         workbook={workbook}
+        hasExtra={extra.length > 0}
+        mixPool={mixPoolSize(sections)}
+        back={back}
+        onStartMix={startMix}
         onNavigate={onNavigate}
       />
     )
@@ -80,8 +112,12 @@ function Inner({
       next={list[idx + 1]}
       part={Math.min(Math.max(part, 0), list[idx].parts.length - 1)}
       onNavigate={nav}
-      onFinish={() => onNavigate(mode === 'workbook' ? { mode: 'extra' } : { mode })}
-      finishLabel={mode === 'workbook' ? '✨ Go to Extra practice →' : '🎉 Back to sections'}
+      onFinish={() =>
+        onNavigate(mode === 'workbook' && extra.length ? { mode: 'extra' } : { mode })
+      }
+      finishLabel={
+        mode === 'workbook' && extra.length ? '✨ Go to Extra practice →' : '🎉 Back to sections'
+      }
     />
   )
 }
@@ -101,23 +137,43 @@ function Landing({
   mode,
   sections,
   workbook,
+  hasExtra,
+  mixPool,
+  back,
+  onStartMix,
   onNavigate,
-}: Pick<QuizExamProps, 'title' | 'intro' | 'onNavigate'> & {
+}: Pick<QuizExamProps, 'title' | 'intro' | 'back' | 'onNavigate'> & {
   mode: Mode
   sections: Section[]
   workbook: Section[]
+  hasExtra: boolean
+  mixPool: number
+  onStartMix: (n: number) => void
 }) {
   const { clear } = useProgress()
   const wb = useStats('', workbook.flatMap(itemIds))
+  const sectionMode = mode === 'extra' ? 'extra' : 'workbook'
+  const groups = sections.reduce<{ name?: string; sections: Section[] }[]>((acc, s) => {
+    const last = acc[acc.length - 1]
+    if (last && last.name === s.group) last.sections.push(s)
+    else acc.push({ name: s.group, sections: [s] })
+    return acc
+  }, [])
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-      <Link to="/" className="text-lg text-indigo-700">
-        ← All exams
-      </Link>
+      {back ? (
+        <button type="button" onClick={back.onClick} className="min-h-12 text-lg text-indigo-700">
+          {back.label}
+        </button>
+      ) : (
+        <Link to="/" className="text-lg text-indigo-700">
+          ← All exams
+        </Link>
+      )}
       <h1 className="mt-2 text-4xl font-bold">{title}</h1>
       {intro && <div className="mt-3 text-xl text-slate-700">{intro}</div>}
 
-      {mode === 'workbook' ? (
+      {sectionMode === 'workbook' ? (
         <div className="mt-6 rounded-2xl bg-amber-50 p-4">
           <h2 className="text-2xl font-bold text-amber-900">📘 Workbook review</h2>
           <p className="text-lg text-amber-900/80">
@@ -134,17 +190,47 @@ function Landing({
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((s) => (
-          <SectionCard
-            key={s.id}
-            section={s}
-            onOpen={() => onNavigate({ mode, section: s.id, part: 0 })}
-          />
-        ))}
-      </div>
+      {groups.map((g, gi) => (
+        <section key={gi} className="mt-6">
+          {g.name && <h2 className="text-2xl font-bold text-slate-800">{g.name}</h2>}
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {g.sections.map((s) => (
+              <SectionCard
+                key={s.id}
+                section={s}
+                onOpen={() => onNavigate({ mode: sectionMode, section: s.id, part: 0 })}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
 
-      {mode === 'workbook' && (
+      {sectionMode === 'workbook' && mixPool > 0 && (
+        <div className="mt-8 rounded-2xl border-2 border-violet-200 bg-violet-50 p-5">
+          <div className="flex items-center gap-4">
+            <span className="text-5xl">🔀</span>
+            <span className="flex-1">
+              <span className="block text-2xl font-bold text-violet-900">Mixed review</span>
+              <span className="block text-lg text-violet-900/80">
+                Questions from every part that doesn't need the myView story, all mixed up. How
+                many questions?
+              </span>
+            </span>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {MIX_SIZES.filter((n) => n < mixPool).map((n) => (
+              <Btn key={n} tone="primary" onClick={() => onStartMix(n)}>
+                {n}
+              </Btn>
+            ))}
+            <Btn tone="primary" onClick={() => onStartMix(mixPool)}>
+              All {mixPool}
+            </Btn>
+          </div>
+        </div>
+      )}
+
+      {sectionMode === 'workbook' && hasExtra && (
         <button
           type="button"
           onClick={() => onNavigate({ mode: 'extra' })}
@@ -188,6 +274,11 @@ function SectionCard({ section, onOpen }: { section: Section; onOpen: () => void
       <span className="text-5xl">{section.emoji}</span>
       <span className="mt-2 text-2xl font-bold">{section.title}</span>
       <span className="text-lg text-slate-600">{section.subtitle}</span>
+      {section.readFirst && (
+        <span className="mt-2 rounded-lg bg-sky-50 px-2 py-1 text-base text-sky-900">
+          📖 Read first: {section.readFirst}
+        </span>
+      )}
       <span className="mt-3 h-3 w-full overflow-hidden rounded-full bg-slate-100">
         <span
           className="block h-full bg-emerald-500"
@@ -262,6 +353,11 @@ function SectionView({
         </nav>
       </header>
 
+      {section.readFirst && part === 0 && (
+        <div className="mt-5 rounded-2xl bg-sky-50 p-4 text-xl text-sky-900">
+          📖 Read the story first: <b>{section.readFirst}</b>. Then answer the questions.
+        </div>
+      )}
       <h2 className="mt-5 text-2xl font-semibold text-indigo-900">
         {p.source && (
           <span className="mr-2 inline-block rounded-lg bg-amber-100 px-2 py-1 text-lg text-amber-900">

@@ -56,7 +56,28 @@ export interface PredictItem {
   after: string
 }
 
-export type ItemInput = ChoiceItem | MatchItem | WriteItem | PredictItem
+/** Tap every word in `text` that matches (e.g. "Underline the nouns"). Words are compared without case or punctuation. */
+export interface SelectItem {
+  kind: 'select'
+  /** What to look for, e.g. "Tap the words with short e." */
+  prompt?: string
+  text: string
+  answers: string[]
+  /** Read `text` aloud with the 🔊 button */
+  speak?: boolean
+}
+
+/** Tap the pieces in the right order (ABC order, story events, words of a sentence). */
+export interface OrderItem {
+  kind: 'order'
+  prompt?: string
+  /** In the correct order */
+  pieces: string[]
+  /** Show the pieces as a list (events) instead of in a row (words) */
+  vertical?: boolean
+}
+
+export type ItemInput = ChoiceItem | MatchItem | WriteItem | PredictItem | SelectItem | OrderItem
 export type Item = ItemInput & { id: string }
 
 export interface PartInput {
@@ -80,6 +101,10 @@ export interface SectionInput {
   title: string
   subtitle: string
   emoji: string
+  /** Heading the section card is listed under on the landing page (e.g. "Vocabulary") */
+  group?: string
+  /** Story to read first (e.g. "myView 1.1 p.16–35"). Such sections are left out of the mixed review. */
+  readFirst?: string
   parts: PartInput[]
 }
 export interface Section extends Omit<SectionInput, 'parts'> {

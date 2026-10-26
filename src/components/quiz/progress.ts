@@ -1,4 +1,5 @@
 import { createContext, useContext, useSyncExternalStore } from 'react'
+import { celebrate } from '../celebrate'
 import type { Result } from './types'
 
 type Progress = Record<string, Result>
@@ -44,7 +45,9 @@ export function useProgress() {
   const progress = useSyncExternalStore(subscribe, () => load(examId))
   return {
     progress,
+    /** Records a result from the child's answer; plays a celebration or an "oops" scene. */
     setResult(id: string, r: Result | undefined) {
+      if (r) celebrate(r !== 'wrong')
       const next = { ...load(examId) }
       if (r) next[id] = r
       else delete next[id]
