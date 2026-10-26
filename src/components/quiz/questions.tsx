@@ -258,12 +258,14 @@ function Write({ item, number }: { item: WithId<WriteItem>; number: number }) {
           )}
         </div>
       )}
-      <div className="mt-3">
-        <HandwritingPad id={item.id} lines={item.lines} />
-      </div>
+      {item.lines !== 0 && (
+        <div className="mt-3">
+          <HandwritingPad id={item.id} lines={item.lines} />
+        </div>
+      )}
       {item.draw && (
         <div className="mt-3">
-          <p className="mb-1 text-lg text-slate-600">🎨 Draw a picture:</p>
+          {item.lines !== 0 && <p className="mb-1 text-lg text-slate-600">🎨 Draw a picture:</p>}
           <HandwritingPad id={`${item.id}#draw`} mode="draw" />
         </div>
       )}
@@ -463,13 +465,15 @@ function Select({ item, number }: { item: WithId<SelectItem>; number: number }) 
   const { progress, setResult } = useProgress()
   const tokens = useMemo(() => item.text.split(/\s+/), [item])
   const targets = useMemo(() => new Set(item.answers.map(norm)), [item])
+  const optional = useMemo(() => new Set((item.optional ?? []).map(norm)), [item])
   const isTarget = (i: number) => targets.has(norm(tokens[i]))
+  const isOptional = (i: number) => optional.has(norm(tokens[i]))
   const done = progress[item.id] === 'correct'
   const [picked, setPicked] = useState<Set<number>>(
     () => new Set(done ? tokens.map((_, i) => i).filter(isTarget) : []),
   )
   const [checked, setChecked] = useState(done)
-  const allRight = tokens.every((_, i) => picked.has(i) === isTarget(i))
+  const allRight = tokens.every((_, i) => isOptional(i) || picked.has(i) === isTarget(i))
 
   const toggle = (i: number) => {
     if (checked) return
@@ -494,13 +498,11 @@ function Select({ item, number }: { item: WithId<SelectItem>; number: number }) 
             ? on
               ? 'border-indigo-600 bg-indigo-100'
               : 'border-transparent bg-slate-50'
-            : on && isTarget(i)
+            : on && (isTarget(i) || isOptional(i))
               ? 'border-emerald-500 bg-emerald-100'
               : on
                 ? 'border-rose-500 bg-rose-100'
-                : isTarget(i) && !allRight
-                  ? 'border-dashed border-amber-500'
-                  : 'border-transparent'
+                : 'border-transparent'
           return (
             <button
               key={i}
@@ -533,7 +535,7 @@ function Select({ item, number }: { item: WithId<SelectItem>; number: number }) 
             <Btn
               tone="bad"
               onClick={() => {
-                setPicked(new Set([...picked].filter(isTarget)))
+                setPicked(new Set([...picked].filter((i) => isTarget(i) || isOptional(i))))
                 setChecked(false)
                 setResult(item.id, undefined)
               }}

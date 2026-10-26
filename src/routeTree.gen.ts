@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FormativeTest3RouteImport } from './routes/formative-test-3'
+import { Route as Grade1Midterm1RouteImport } from './routes/grade-1-midterm-1'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const FormativeTest3Route = FormativeTest3RouteImport.update({
   path: '/formative-test-3',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Grade1Midterm1Route = Grade1Midterm1RouteImport.update({
+  id: '/grade-1-midterm-1',
+  path: '/grade-1-midterm-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/formative-test-3': typeof FormativeTest3Route
+  '/grade-1-midterm-1': typeof Grade1Midterm1Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/formative-test-3': typeof FormativeTest3Route
+  '/grade-1-midterm-1': typeof Grade1Midterm1Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/formative-test-3': typeof FormativeTest3Route
+  '/grade-1-midterm-1': typeof Grade1Midterm1Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/formative-test-3'
+  fullPaths: '/' | '/formative-test-3' | '/grade-1-midterm-1'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/formative-test-3'
-  id: '__root__' | '/' | '/formative-test-3'
+  to: '/' | '/formative-test-3' | '/grade-1-midterm-1'
+  id: '__root__' | '/' | '/formative-test-3' | '/grade-1-midterm-1'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FormativeTest3Route: typeof FormativeTest3Route
+  Grade1Midterm1Route: typeof Grade1Midterm1Route
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormativeTest3RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/grade-1-midterm-1': {
+      id: '/grade-1-midterm-1'
+      path: '/grade-1-midterm-1'
+      fullPath: '/grade-1-midterm-1'
+      preLoaderRoute: typeof Grade1Midterm1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FormativeTest3Route: FormativeTest3Route,
+  Grade1Midterm1Route: Grade1Midterm1Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

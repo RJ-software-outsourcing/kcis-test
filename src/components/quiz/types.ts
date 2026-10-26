@@ -36,7 +36,7 @@ export interface WriteItem {
   /** Symbol code to decode (shown as tiles) */
   code?: string[]
   answer?: string
-  /** Number of ruled lines (default 1) */
+  /** Number of ruled lines (default 1; 0 with `draw` = drawing only) */
   lines?: number
   /** Also show a blank drawing box */
   draw?: boolean
@@ -63,6 +63,8 @@ export interface SelectItem {
   prompt?: string
   text: string
   answers: string[]
+  /** Words that may be tapped or not (e.g. "brick" in "red brick houses") */
+  optional?: string[]
   /** Read `text` aloud with the 🔊 button */
   speak?: boolean
 }
@@ -105,6 +107,8 @@ export interface SectionInput {
   group?: string
   /** Story to read first (e.g. "myView 1.1 p.16–35"). Such sections are left out of the mixed review. */
   readFirst?: string
+  /** Helpful links shown with the read-first note (e.g. a read-along video) */
+  links?: { label: string; url: string }[]
   parts: PartInput[]
 }
 export interface Section extends Omit<SectionInput, 'parts'> {

@@ -40,12 +40,13 @@ function roundRobin<T>(queues: T[][], n: number): T[] {
 }
 
 /**
- * Picks `n` items spread as evenly as possible over the sections, and inside each
- * section over its parts. The same seed always gives the same questions.
+ * Picks `n` items spread as evenly as possible: over the section groups (the test's
+ * categories), inside a group over its sections, and inside a section over its parts.
+ * The same seed always gives the same questions.
  */
 export function pickMix(sections: Section[], n: number, seed: number): MixItem[] {
   const random = seededRandom(seed)
-  const perSection = mixableSections(sections).map((section) => {
+  const perSection = (section: Section) => {
     const parts = section.parts
       .filter((p) => !p.aside)
       .map((p) =>
@@ -56,8 +57,16 @@ export function pickMix(sections: Section[], n: number, seed: number): MixItem[]
       )
       .filter((q) => q.length)
     return roundRobin(shuffle(parts, random), Infinity)
-  })
-  const picked = roundRobin(shuffle(perSection, random), n)
+  }
+  const groups = new Map<string, Section[]>()
+  for (const s of mixableSections(sections)) {
+    const key = s.group ?? s.id
+    groups.set(key, [...(groups.get(key) ?? []), s])
+  }
+  const perGroup = [...groups.values()].map((g) =>
+    roundRobin(shuffle(g.map(perSection), random), Infinity),
+  )
+  const picked = roundRobin(shuffle(perGroup, random), n)
   return shuffle(picked, random).map((m, i) => ({
     ...m,
     item: { ...m.item, id: `${MIX_PREFIX}${i}` },

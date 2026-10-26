@@ -26,11 +26,13 @@ src/
     index.tsx           "/" lists all exams (reads src/exams/*/meta.ts)
     <slug>.tsx          One route per exam, loads src/exams/<slug>/ExamPage
   components/quiz/      Reusable exam UI — use it for every exam
-    types.ts            Item types (choice / match / write / predict) + defineSection()
-    QuizExam.tsx        Section grid + part-by-part section view
+    types.ts            Item types (choice / match / write / predict / select / order) + defineSection()
+    QuizExam.tsx        Section grid (grouped) + part-by-part section view
+    MixedQuiz.tsx       Mixed review: N questions spread evenly over groups/sections/parts
     questions.tsx       Question renderers
     HandwritingPad.tsx  Canvas for Apple Pencil / finger writing (palm rejection)
-    progress.ts         Per-exam results in localStorage
+    progress.ts         Per-exam results in localStorage (every result also triggers a celebration)
+  components/celebrate/ Correct/wrong scenes + Web Audio sounds (ported from kcis-grade1-vocaburary)
   exams/
     types.ts            ExamMeta type
     index.ts            Collects all meta via import.meta.glob
@@ -54,7 +56,8 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 1. Read every image in `test-raw-material/<slug>/` (HEIC: convert with `sips -s format jpeg -Z 1600` into the scratchpad first).
 2. Write the spec in `src/exams/<slug>/README.md` (scope, sections, question types) and commit it **before** implementing.
 3. Implement the question banks in `src/exams/<slug>/data/` using the shared `components/quiz` types; the exam page just passes sections to `<QuizExam>`.
-4. Navigation uses search params (`?mode=extra&section=<id>&part=<n>`) defined by `validateSearch` in the route file. `QuizExam` splits parts into two modes: workbook (parts with `source`, the default landing) and extra practice (`mode=extra`, parts without `source`).
+4. Navigation uses search params (`?mode=extra&section=<id>&part=<n>`, `?mode=mixed&size=<n>&seed=<n>`) defined by `validateSearch` in the route file. `QuizExam` has three modes: workbook (parts with `source`, the default landing), extra practice (`mode=extra`, parts without `source`; the button only shows when such parts exist) and mixed review (`mode=mixed`).
+5. Sections: set `group` (the study guide's category; cards are grouped by it and the mixed review balances over it) and, for story-bound sections, `readFirst` (+ optional `links`, e.g. a read-along video). `readFirst` sections are left out of the mixed review.
 
 ## Rules
 - **Dynamic loading**: every exam page must be its own chunk; `/` may only load `meta.ts` files.

@@ -356,6 +356,21 @@ function SectionView({
       {section.readFirst && part === 0 && (
         <div className="mt-5 rounded-2xl bg-sky-50 p-4 text-xl text-sky-900">
           📖 Read the story first: <b>{section.readFirst}</b>. Then answer the questions.
+          {section.links && (
+            <div className="mt-2 flex flex-wrap gap-3">
+              {section.links.map((l) => (
+                <a
+                  key={l.url}
+                  href={l.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-12 items-center rounded-xl bg-white px-4 text-lg font-semibold text-sky-800 shadow-sm"
+                >
+                  {l.label} ↗
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <h2 className="mt-5 text-2xl font-semibold text-indigo-900">

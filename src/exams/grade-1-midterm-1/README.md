@@ -22,14 +22,14 @@ The scope comes from the two study guides in `test-guide/` (`it-guide.jpg`, `lt-
 ## Two tracks, one page
 `/grade-1-midterm-1` first shows a picker (LT / IT, with test dates). Each track is its own `QuizExam` with its own progress (`grade-1-midterm-1-it`, `grade-1-midterm-1-lt` in localStorage).
 
-Inside a track, section cards are grouped:
-- Skills that don't depend on a story (phonics, words to know, vocabulary, grammar) — mixed freely.
-- **📖 Reading** — one section per story. Each has `readFirst` (myView pages): the card and the first part say "Read the story first". The child reads the story in myView, then answers.
+Inside a track, section cards are grouped by the study guide's categories:
+- IT: **Foundational Skills** (phonics + My Words to Know), **Vocabulary**; LT: **Vocabulary**, **Grammar**. These don't depend on a story.
+- **📖 Reading** — one section per story. Each has `readFirst` (myView pages): the card and the first part say "Read the story first", with a 🎧 link to the story's read-along video from [MyViewReview](https://myviewreview.com/grade1/u1-my-neighborhood) (the KCIS teachers' review site). The child reads the story in myView, then answers.
 
 ## 🔀 Mixed review
 Below the sections: "Mixed review" with a size picker (10 / 20 / 30 / 50 / All).
 - Uses every section **without** `readFirst` (no story needed).
-- Questions are spread as evenly as possible: round-robin over sections, and inside a section round-robin over its parts; then shuffled. The seed is in the URL (`?mode=mixed&size=20&seed=…`), so a reload keeps the same set.
+- Questions are spread as evenly as possible: round-robin over the categories (section `group`), inside a category over its sections, inside a section over its parts; then shuffled. E.g. LT 20 → 10 vocabulary + 10 grammar. The seed is in the URL (`?mode=mixed&size=20&seed=…`), so a reload keeps the same set.
 - Auto-checkable items and handwriting items with a model answer; open-ended items are left out.
 - One question at a time, its directions and section shown above it; numbered dots (green/red) to jump around; score at the end; "New mix".
 - After a correct answer it moves on by itself after 3 s (countdown in the Next button). Coming back to an answered question does not auto-advance.
@@ -43,13 +43,13 @@ Wordlist note: the study guide's "U1W1 / U1W2 / U1W5 Wordlist" is the vocabulary
 
 | Group | Section (id) | Sources |
 |---|---|---|
-| Phonics | Short a · Mm Ss Tt (`short-a`) | myView p.12, 13, 20, 21, 39, 43, 44, 45–47 (*At a Mat*); Phonics p.2, 3, 5 |
-| Phonics | Short i · Cc Pp Nn (`short-i`) | myView p.52, 53, 60, 61, 85, 87, 91, 92; Phonics p.10, 11, 13 |
-| Phonics | Short o · Ff Bb Gg (`short-o`) | myView p.101, 108, 109, 123, 125, 129, 130; Phonics p.6, 7, 9 |
-| Phonics | Short e · Dd Ll Hh (`short-e`) | myView p.145, 146, 147, 167, 169, 173, 174; Phonics p.14, 15, 17 |
-| Phonics | Short u · Rr Ww Jj Kk (`short-u`) | myView p.183, 190, 191, 204 (spelling), 205, 209, 210; Phonics p.18, 19, 21 |
-| Phonics | Qu · Vv Yy Zz (`qu`) | myView p.222–229 (letters/words, not the *Words to Know* page); Phonics p.22, 23 |
-| Phonics | My Words to Know (`words`) | myView p.40, 88, 126, 170, 206, 227 + the *Words to Know* halves of the spelling pages (p.85, 123, 167, 204, 225); Phonics p.4, 8, 12, 16, 20, 24 |
+| Foundational | Short a · Mm Ss Tt (`short-a`) | myView p.12, 13, 20, 21, 39, 43, 44, 45–47 (*At a Mat*); Phonics p.2, 3, 5 |
+| Foundational | Short i · Cc Pp Nn (`short-i`) | myView p.52, 53, 60, 61, 85, 87, 91, 92; Phonics p.10, 11, 13 |
+| Foundational | Short o · Ff Bb Gg (`short-o`) | myView p.101, 108, 109, 123, 125, 129, 130; Phonics p.6, 7, 9 |
+| Foundational | Short e · Dd Ll Hh (`short-e`) | myView p.145, 146, 147, 167, 169, 173, 174; Phonics p.14, 15, 17 |
+| Foundational | Short u · Rr Ww Jj Kk (`short-u`) | myView p.183, 190, 191, 204 (spelling), 205, 209, 210; Phonics p.18, 19, 21 |
+| Foundational | Qu · Vv Yy Zz (`qu`) | myView p.222–229 (letters/words, not the *Words to Know* page); Phonics p.22, 23 |
+| Foundational | My Words to Know (`words`) | myView p.40, 88, 126, 170, 206, 227 + the *Words to Know* halves of the spelling pages (p.85, 123, 167, 204, 225); Phonics p.4, 8, 12, 16, 20, 24 |
 | Vocabulary | The Blackout words (`vocab-blackout`) | IT LAW p.4–5, 8–9; myView p.50 (nouns: radio, boy, pet) |
 | Vocabulary | Henry on Wheels words (`vocab-henry`) | IT LAW p.12–13, 16–17; myView p.82 |
 | Vocabulary | Making a Map words (`vocab-map`) | IT LAW p.20–21, 24–25 |
@@ -89,8 +89,8 @@ Every simple-sentence activity also checks the three rules:
 ## Item types (`components/quiz/types.ts`)
 - `choice` — multiple choice; `___` blanks fill in when correct.
 - `match` — tap a word, then its match (≤ 4 pairs per item on iPad).
-- `write` — handwriting pad; `answer` → self-check, no answer → "Done".
-- `select` — tap all the right words in a sentence (underline / circle / highlight tasks).
+- `write` — handwriting pad; `answer` → self-check, no answer → "Done". `draw` adds a drawing box; `lines: 0` with `draw` = drawing only.
+- `select` — tap all the right words in a sentence (underline / circle / highlight tasks); `optional` words may be tapped or not (e.g. *brick* in "red brick houses").
 - `order` — tap pieces in order (`vertical` for events/steps).
 - `predict` — read, predict, read on (used for the Lila story).
 Helpers for this exam: `helpers.ts` (`choice`, `pic`, `yesNo`, `listen`, `write`, `select`, `order`, `matches`, `lawVocabParts`).
@@ -113,5 +113,5 @@ src/exams/grade-1-midterm-1/
 
 ## Status
 - [x] Spec
-- [ ] IT question banks
-- [ ] LT question banks
+- [x] IT question banks — 13 sections, 583 items (495 in the mixed-review pool)
+- [x] LT question banks — 11 sections, 344 items (271 in the mixed-review pool)
