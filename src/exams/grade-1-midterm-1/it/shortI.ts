@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem, WriteItem } from '../../../components/quiz/types'
-import { choice, listen, pic, write, yesNo } from '../helpers'
+import { choice, pic, write, yesNo } from '../helpers'
 
 const NOT_I = ['a', 'e', 'o', 'u']
 const LISTEN = 'Tap 🔊 to hear the picture name.'
@@ -16,10 +16,6 @@ const sound = (
   picture
     ? pic(picture, word, prompt, answer, others)
     : choice(prompt ?? LISTEN, answer, others, { speak: word, reveal: `🔊 ${word}` })
-
-/** What is the middle sound? (always short i here) */
-const middle = (picture: string | undefined, word: string) =>
-  sound(picture, word, undefined, 'i', NOT_I)
 
 /** Does the picture name have the short i sound? */
 const hasI = (picture: string | undefined, word: string, yes: boolean): ChoiceItem =>
@@ -50,45 +46,6 @@ export const shortI = defineSection({
   group: 'Foundational Skills',
   parts: [
     {
-      source: 'myView p.52',
-      title: 'Name each picture and listen to the middle sound. Which sound is in the middle?',
-      columns: 3,
-      items: [
-        middle('🧷', 'pin'),
-        middle('6️⃣', 'six'),
-        middle(undefined, 'wig'),
-        middle('🚢', 'ship'),
-        middle(undefined, 'mix'),
-        middle(undefined, 'lid'),
-        middle(undefined, 'hit'),
-        middle(undefined, 'bib'),
-        middle(undefined, 'dish'),
-      ],
-    },
-    {
-      source: 'myView p.53',
-      title: 'Blend and read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [listen('it', ['sit']), listen('sit', ['it'])],
-    },
-    {
-      source: 'myView p.53',
-      title: 'Read these sentences. Tap 🔊 and tap the sentence you hear.',
-      columns: 2,
-      items: [
-        listen('I am Sis.', ['I see Tim.', 'I sit.']),
-        listen('I see Tim.', ['I am Sis.', 'It is his mat.']),
-        listen('I sit.', ['I see Tim.', 'It is his mat.']),
-        listen('It is his mat.', ['I am Sis.', 'I sit.']),
-      ],
-    },
-    {
-      source: 'myView p.60',
-      title: 'Read these sentences. Tap 🔊 and tap the sentence you hear.',
-      columns: 2,
-      items: [listen('Tim can sit.', ['Can Tim sit?']), listen('Can Tim sit?', ['Tim can sit.'])],
-    },
-    {
       source: 'myView p.60',
       title: 'Say each picture name. Write the words. Read the words.',
       columns: 2,
@@ -114,45 +71,6 @@ export const shortI = defineSection({
       title: 'Spell the short i words. Tap 🔊 to hear each word.',
       columns: 2,
       items: [spell('it'), spell('sit'), spell('mitt'), spell('miss')],
-    },
-    {
-      source: 'myView p.87',
-      title: 'Blend and read each word. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('can', ['cap', 'tan']),
-        listen('nap', ['cap', 'pat']),
-        listen('cap', ['can', 'nap']),
-        listen('sip', ['cap', 'nap']),
-        listen('pat', ['tan', 'cap']),
-        listen('tan', ['can', 'pat']),
-      ],
-    },
-    {
-      source: 'myView p.91',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('can', ['pan', 'man']),
-        listen('pan', ['can', 'man']),
-        listen('man', ['can', 'pan']),
-        listen('it', ['pit', 'sit']),
-        listen('pit', ['it', 'sit']),
-        listen('sit', ['it', 'pit']),
-      ],
-    },
-    {
-      source: 'myView p.91',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('in', ['pin', 'tin']),
-        listen('pin', ['in', 'tin']),
-        listen('tin', ['in', 'pin']),
-        listen('map', ['tap', 'cap']),
-        listen('tap', ['map', 'cap']),
-        listen('cap', ['map', 'tap']),
-      ],
     },
     {
       source: 'myView p.91',

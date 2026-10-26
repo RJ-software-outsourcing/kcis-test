@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem } from '../../../components/quiz/types'
-import { choice, listen, matches, pic, write, yesNo } from '../helpers'
+import { choice, matches, pic, write, yesNo } from '../helpers'
 
 const dictation = (word: string) => write(undefined, word, { speak: word })
 const letter = (prompt: string, answer: string, others: string[], fills?: string[]) =>
@@ -30,32 +30,6 @@ export const shortU = defineSection({
   group: 'Foundational Skills',
   parts: [
     {
-      source: 'myView p.183',
-      title: 'Blend and read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('dug', ['hug', 'sub']),
-        listen('fun', ['nut', 'bus']),
-        listen('sub', ['bus', 'dug']),
-        listen('nut', ['fun', 'hug']),
-        listen('hug', ['dug', 'bus']),
-        listen('bus', ['sub', 'fun']),
-      ],
-    },
-    {
-      source: 'myView p.190',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('dug', ['hug', 'mug']),
-        listen('hug', ['mug', 'dug']),
-        listen('mug', ['dug', 'hug']),
-        listen('but', ['nut', 'hut']),
-        listen('nut', ['hut', 'but']),
-        listen('hut', ['nut', 'but']),
-      ],
-    },
-    {
       source: 'myView p.190',
       title: 'Say each picture name. Write the word on the lines. Read the words.',
       columns: 2,
@@ -79,49 +53,6 @@ export const shortU = defineSection({
       title: 'Read and spell the short u words. Tap 🔊 to hear each word.',
       columns: 2,
       items: [dictation('bug'), dictation('hug'), dictation('tug'), dictation('dug')],
-    },
-    {
-      source: 'myView p.205',
-      title: 'Say each picture name. Listen to the sound at the beginning. Which letter spells it?',
-      columns: 2,
-      items: [
-        pic('🪨', 'rock', undefined, 'r', ['w', 'j', 'k']),
-        pic('🕸️', 'web', undefined, 'w', ['r', 'j', 'k']),
-        pic('🏺', 'jug', undefined, 'j', ['r', 'w', 'k']),
-        pic('🪁', 'kite', undefined, 'k', ['r', 'w', 'j']),
-      ],
-    },
-    {
-      source: 'myView p.205',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [listen('rip', ['job', 'kit']), listen('job', ['rip', 'jet'])],
-    },
-    {
-      source: 'myView p.209',
-      title: 'Decode these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('rag', ['rat', 'rug']),
-        listen('rat', ['rag', 'rug']),
-        listen('rug', ['rag', 'rat']),
-        listen('web', ['wag', 'wet']),
-        listen('wag', ['web', 'wet']),
-        listen('wet', ['web', 'wag']),
-      ],
-    },
-    {
-      source: 'myView p.209',
-      title: 'Decode these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('jet', ['jug', 'Jan']),
-        listen('jug', ['jet', 'Jan']),
-        listen('Jan', ['jet', 'jug']),
-        listen('Ken', ['kit', 'kid']),
-        listen('kit', ['Ken', 'kid']),
-        listen('kid', ['Ken', 'kit']),
-      ],
     },
     {
       source: 'myView p.209',

@@ -1,5 +1,5 @@
 import { defineSection } from '../../../components/quiz/types'
-import { choice, lawVocabParts, listen, matches } from '../helpers'
+import { lawVocabParts } from '../helpers'
 
 export const vocabGarden = defineSection({
   id: 'vocab-garden',
@@ -123,74 +123,4 @@ export const vocabLook2 = defineSection({
       right: 'The opposite of left.',
     },
   }),
-})
-
-const SKILL_PAGES = 'myView p.104, 127, 134, 142, 171, 178'
-
-export const skillWords = defineSection({
-  id: 'skill-words',
-  title: 'Skill Words & Words to Know',
-  subtitle: 'compare, contrast, visualize, heading, label … · up, two, that, by, are, look …',
-  emoji: '🧠',
-  group: 'Vocabulary',
-  parts: [
-    {
-      source: SKILL_PAGES,
-      title: 'Match the skill word to what it means.',
-      // Definitions as printed on the myView skill pages.
-      items: matches({
-        'informational text': 'Tells facts about real people, things, or events.',
-        'text features': 'They help you find and learn information.',
-        heading: 'Tells the topic of a section.',
-        label: 'Names what a picture shows.',
-        compare: 'Tell how characters are alike.',
-        contrast: 'Tell how characters are different.',
-        visualize: 'Make pictures in your mind from the details in a story.',
-        'text evidence': 'The details that support what a reader thinks about the text.',
-      }),
-    },
-    {
-      source: SKILL_PAGES,
-      title: 'Choose the word that completes the sentence.',
-      columns: 2,
-      items: [
-        choice('To compare characters, describe how they are ___ .', 'alike', ['different']),
-        choice('To contrast characters, describe how they are ___ .', 'different', ['alike']),
-        choice('When you ___ , you make pictures in your mind.', 'visualize', [
-          'compare',
-          'contrast',
-        ]),
-        choice('A ___ tells the topic of a section.', 'heading', ['label']),
-        choice('A ___ names what a picture shows.', 'label', ['heading']),
-        choice('Text ___ help you find and learn information.', 'features', ['evidence']),
-        choice(
-          'Text evidence is the details that ___ what a reader thinks about the text.',
-          'support',
-          ['contrast', 'visualize'],
-        ),
-        choice(
-          'Which kind of text tells facts about real people, things, or events?',
-          'informational text',
-          ['realistic fiction'],
-        ),
-      ],
-    },
-    {
-      source: 'Term 1 wordlist',
-      title: '🔊 Listen. Tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('up', ['by', 'you']),
-        listen('two', ['they', 'by']),
-        listen('that', ['they', 'have']),
-        listen('have', ['are', 'was']),
-        listen('they', ['that', 'two']),
-        listen('by', ['up', 'you']),
-        listen('are', ['was', 'have']),
-        listen('was', ['are', 'you']),
-        listen('you', ['up', 'look']),
-        listen('look', ['by', 'two']),
-      ],
-    },
-  ],
 })

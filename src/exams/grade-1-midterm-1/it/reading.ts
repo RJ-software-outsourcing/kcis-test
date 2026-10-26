@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem } from '../../../components/quiz/types'
-import { choice, select, write } from '../helpers'
+import { choice, write } from '../helpers'
 import { WorkbookMap } from './TownMap'
 
 const READING = '📖 Reading — read the story in myView first'
@@ -178,16 +178,6 @@ export const blackout = defineSection({
       title:
         'A first-person text is a story told by a character in the story. First-person texts use words such as I, me, my, and we.',
       items: [
-        choice(
-          'Which sentence is told by a character (first person)?',
-          'I go upstairs with my flashlight.',
-          ['He goes upstairs with his flashlight.', 'The boy goes upstairs with a flashlight.'],
-        ),
-        select(
-          'Tap the words that show it is a first-person text.',
-          'I go upstairs with my flashlight.',
-          ['I', 'my'],
-        ),
         write(
           'Write a sentence about something that happened to you. Use a word that shows it is a first-person text (I, me, my, we).',
           undefined,
@@ -199,11 +189,6 @@ export const blackout = defineSection({
       source: 'myView p.48',
       title: 'Draw the main character of The Blackout. Look back at the text.',
       items: [
-        choice('Who is the main character of The Blackout?', 'The boy (the narrator)', [
-          'Mama',
-          'Papa',
-          'Mrs. Johnson',
-        ]),
         write('Draw the main character.', undefined, { lines: 0, draw: true }),
       ],
     },

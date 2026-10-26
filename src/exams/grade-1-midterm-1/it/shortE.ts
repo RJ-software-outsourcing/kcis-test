@@ -1,7 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import { choice, listen, matches, order, pic, select, write } from '../helpers'
 
-const dictation = (word: string) => write(undefined, word, { speak: word })
 const letter = (prompt: string, answer: string, others: string[]) =>
   choice(prompt, answer, others, { noSpeak: true })
 
@@ -12,32 +11,6 @@ export const shortE = defineSection({
   emoji: '🐔',
   group: 'Foundational Skills',
   parts: [
-    {
-      source: 'myView p.145',
-      title: 'Blend and read each word. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('pet', ['met', 'set']),
-        listen('men', ['met', 'peg']),
-        listen('set', ['pet', 'met']),
-        listen('beg', ['peg', 'pet']),
-        listen('met', ['men', 'set']),
-        listen('peg', ['beg', 'pet']),
-      ],
-    },
-    {
-      source: 'myView p.146',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('set', ['get', 'met']),
-        listen('get', ['set', 'met']),
-        listen('met', ['set', 'get']),
-        listen('men', ['pen', 'Ben']),
-        listen('pen', ['men', 'Ben']),
-        listen('Ben', ['men', 'pen']),
-      ],
-    },
     {
       source: 'myView p.146',
       title: 'Say each picture name. Write each word. Then read the words.',
@@ -63,40 +36,8 @@ export const shortE = defineSection({
     },
     {
       source: 'myView p.167',
-      title: 'Spell the short e words. Tap 🔊 to hear each word.',
-      columns: 2,
-      items: [dictation('set'), dictation('met'), dictation('pet'), dictation('net')],
-    },
-    {
-      source: 'myView p.167',
       title: 'Alphabetize the words. Put them in ABC order by the first letter.',
       items: [order('Tap the words in ABC order.', ['met', 'net', 'pet', 'set'])],
-    },
-    {
-      source: 'myView p.169',
-      title: 'Blend and read each word. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('led', ['let', 'dot']),
-        listen('hit', ['had', 'dim']),
-        listen('dot', ['dim', 'led']),
-        listen('let', ['led', 'hit']),
-        listen('had', ['hit', 'dot']),
-        listen('dim', ['dot', 'had']),
-      ],
-    },
-    {
-      source: 'myView p.173',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('bed', ['let', 'hen']),
-        listen('let', ['bed', 'hen']),
-        listen('hen', ['bed', 'let']),
-        listen('dig', ['lip', 'him']),
-        listen('lip', ['dig', 'him']),
-        listen('him', ['dig', 'lip']),
-      ],
     },
     {
       source: 'myView p.173',

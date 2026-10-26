@@ -77,32 +77,6 @@ export const gardenParty = defineSection({
       ],
     },
     {
-      source: 'myView p.142',
-      title: 'Spotlight on Genre: Realistic Fiction. Choose the best answer.',
-      columns: 2,
-      items: [
-        choice('___ are the people in realistic fiction.', 'Characters', ['Details', 'Pictures']),
-        choice('___ describe characters and the reasons for their actions.', 'Details', [
-          'Characters',
-        ]),
-        choice('Your purpose for reading is your ___ for reading.', 'reason', ['picture']),
-        choice('Your purpose could be to learn or to ___ .', 'have fun', ['be quiet']),
-        choice('What kind of story is Garden Party?', 'realistic fiction', ['informational text']),
-      ],
-    },
-    {
-      source: 'myView p.143',
-      title: 'Realistic Fiction Anchor Chart. Choose the best answer.',
-      columns: 2,
-      items: [
-        choice('Character details come from the words and the ___ .', 'pictures', ['headings']),
-        choice('Pam jumps up and down. "YES!" Pam said. How does Pam feel?', 'Pam is happy!', [
-          'Pam is sad.',
-          'Pam is scared.',
-        ]),
-      ],
-    },
-    {
       source: 'myView p.178',
       title: 'Visualize Details: How do you picture the neighbors in Garden Party?',
       items: [
@@ -327,21 +301,6 @@ export const lookBothWays = defineSection({
     },
     {
       source: 'myView p.104',
-      title: 'Informational Text. Choose the best answer.',
-      columns: 2,
-      items: [
-        choice('An informational text tells ___ about real people, things, or events.', 'facts', [
-          'made-up stories',
-        ]),
-        choice('An informational text may have text features, such as ___ .', 'headings', [
-          'characters',
-        ]),
-        choice('In "Neighborhoods", the word PLACES is a ___ .', 'heading', ['label']),
-        choice('In "Neighborhoods", where do people buy food?', 'at a market', ['at a school']),
-      ],
-    },
-    {
-      source: 'myView p.104',
       title: 'Turn and Talk',
       items: [
         write(
@@ -349,15 +308,6 @@ export const lookBothWays = defineSection({
           'Informational text tells facts about real people, things, or events. Realistic fiction is a made-up story with characters that could be real.',
           { lines: 2 },
         ),
-      ],
-    },
-    {
-      source: 'myView p.105',
-      title: 'Informational Text Anchor Chart. Choose the best answer.',
-      columns: 2,
-      items: [
-        choice('A heading tells what a ___ is about.', 'section', ['picture']),
-        choice('A heading helps you ___ information.', 'find', ['draw']),
       ],
     },
     {

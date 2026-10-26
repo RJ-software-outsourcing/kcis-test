@@ -1,8 +1,7 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem } from '../../../components/quiz/types'
-import { choice, listen, pic, select, write, yesNo } from '../helpers'
+import { choice, pic, select, write, yesNo } from '../helpers'
 
-const dictation = (word: string) => write(undefined, word, { speak: word })
 const letter = (prompt: string, answer: string, others: string[], fills?: string[]) =>
   choice(prompt, answer, others, { noSpeak: true, fills })
 
@@ -30,29 +29,6 @@ export const qu = defineSection({
   group: 'Foundational Skills',
   parts: [
     {
-      source: 'myView p.222',
-      title: 'Say the name of each picture. Listen to the beginning sound. Which letters spell it?',
-      columns: 3,
-      items: [
-        pic('🪙', 'quarter', undefined, 'qu', ['k', 'w']),
-        pic('👸', 'queen', undefined, 'qu', ['k', 'w']),
-        pic('❓', 'question', undefined, 'qu', ['k', 'w']),
-      ],
-    },
-    {
-      source: 'myView p.222',
-      title: 'The letters qu make the sound at the beginning of quit. Tap 🔊 and tap the word.',
-      items: [listen('quit', ['queen', 'question'])],
-    },
-    {
-      source: 'myView p.223',
-      title: 'Read these sentences. Tap 🔊 and tap the sentence you hear.',
-      items: [
-        listen('Will Quinn quit?', ['Quinn will not quit.']),
-        listen('Quinn will not quit.', ['Will Quinn quit?']),
-      ],
-    },
-    {
       source: 'myView p.223',
       title:
         'Say each picture name. Choose the letters that stand for the beginning sound of each picture name.',
@@ -77,12 +53,6 @@ export const qu = defineSection({
     },
     {
       source: 'myView p.225',
-      title: 'Spell the qu words and the words that rhyme with them. Tap 🔊 to hear each word.',
-      columns: 2,
-      items: [dictation('quit'), dictation('bit'), dictation('quill'), dictation('will')],
-    },
-    {
-      source: 'myView p.225',
       title: 'Look at the spelling patterns to sort the words. Which pattern: -it or -ill?',
       columns: 2,
       items: [
@@ -90,40 +60,6 @@ export const qu = defineSection({
         pattern('bit', '-it'),
         pattern('quill', '-ill'),
         pattern('will', '-ill'),
-      ],
-    },
-    {
-      source: 'myView p.226',
-      title:
-        'Say what the bee does. Listen to the ending sound. Name the other pictures. Listen to the beginning sounds.',
-      columns: 2,
-      items: [
-        pic('🐝', 'buzz', 'What does the bee say? Which letter spells the sound at the end?', 'z', [
-          'v',
-          'y',
-        ]),
-        pic('🧶', 'yarn', 'Which letter spells the beginning sound?', 'y', ['v', 'z']),
-        pic('🚐', 'van', 'Which letter spells the beginning sound?', 'v', ['y', 'z']),
-        pic('🦓', 'zebra', 'Which letter spells the beginning sound?', 'z', ['v', 'y']),
-      ],
-    },
-    {
-      source: 'myView p.226',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [listen('van', ['vet', 'yet']), listen('yet', ['van', 'yak'])],
-    },
-    {
-      source: 'myView p.228',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('yum', ['vet', 'zap']),
-        listen('vet', ['yum', 'zap']),
-        listen('zap', ['yum', 'vet']),
-        listen('van', ['zag', 'yet']),
-        listen('zag', ['van', 'yet']),
-        listen('yet', ['van', 'zag']),
       ],
     },
     {

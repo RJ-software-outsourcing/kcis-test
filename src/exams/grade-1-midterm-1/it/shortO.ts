@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem, WriteItem } from '../../../components/quiz/types'
-import { choice, listen, matches, order, pic, select, write } from '../helpers'
+import { choice, matches, order, pic, select, write } from '../helpers'
 
 const NOT_O = ['a', 'e', 'i', 'u']
 const AIO = ['a', 'i', 'o']
@@ -36,30 +36,6 @@ export const shortO = defineSection({
   group: 'Foundational Skills',
   parts: [
     {
-      source: 'myView p.101',
-      title: 'Blend and read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('mop', ['mom', 'pop']),
-        listen('not', ['cot', 'Tom']),
-        listen('cot', ['not', 'pop']),
-        listen('mom', ['mop', 'Tom']),
-        listen('pop', ['mop', 'cot']),
-        listen('Tom', ['mom', 'not']),
-      ],
-    },
-    {
-      source: 'myView p.108',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 2,
-      items: [
-        listen('on', ['not']),
-        listen('not', ['on']),
-        listen('Tom', ['mom']),
-        listen('mom', ['Tom']),
-      ],
-    },
-    {
       source: 'myView p.108',
       title: 'Say each picture name. Write the letter o to finish the word. Then read the words.',
       columns: 2,
@@ -90,53 +66,8 @@ export const shortO = defineSection({
     },
     {
       source: 'myView p.123',
-      title: 'Spell the short o words. Tap 🔊 to hear each word.',
-      columns: 2,
-      items: [spell('not'), spell('got'), spell('cot'), spell('pot')],
-    },
-    {
-      source: 'myView p.123',
       title: 'Alphabetize the words by the first letter.',
       items: [order('Tap the words in ABC order.', ['cot', 'got', 'not', 'pot'])],
-    },
-    {
-      source: 'myView p.125',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('bag', ['big', 'gap']),
-        listen('fin', ['fig', 'big']),
-        listen('cab', ['gap', 'bag']),
-        listen('fig', ['fin', 'big']),
-        listen('big', ['bag', 'fig']),
-        listen('gap', ['cab', 'bag']),
-      ],
-    },
-    {
-      source: 'myView p.129',
-      title: 'Decode these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('big', ['fig', 'wig']),
-        listen('fig', ['big', 'wig']),
-        listen('wig', ['big', 'fig']),
-        listen('got', ['pot', 'not']),
-        listen('pot', ['got', 'not']),
-        listen('not', ['got', 'pot']),
-      ],
-    },
-    {
-      source: 'myView p.129',
-      title: 'Decode these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('tin', ['fin', 'pin']),
-        listen('fin', ['tin', 'pin']),
-        listen('pin', ['tin', 'fin']),
-        listen('sit', ['bit', 'fit']),
-        listen('bit', ['sit', 'fit']),
-        listen('fit', ['sit', 'bit']),
-      ],
     },
     {
       source: 'myView p.129',

@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { ChoiceItem, WriteItem } from '../../../components/quiz/types'
-import { choice, listen, pic, select, write, yesNo } from '../helpers'
+import { choice, pic, select, write, yesNo } from '../helpers'
 
 const NOT_A = ['e', 'i', 'o', 'u']
 const LISTEN = 'Tap 🔊 to hear the picture name.'
@@ -47,22 +47,6 @@ export const shortA = defineSection({
   group: 'Foundational Skills',
   parts: [
     {
-      source: 'myView p.12',
-      title: 'Say each picture name. Listen to the middle sound. Which sound is in the middle?',
-      columns: 3,
-      items: [
-        middle('🐈', 'cat'),
-        middle('👒', 'hat'),
-        middle('🪭', 'fan'),
-        middle('🚕', 'cab'),
-        middle('😞', 'sad'),
-        middle('👜', 'bag'),
-        middle('🍠', 'yam'),
-        middle('🍳', 'pan'),
-        middle('💵', 'cash'),
-      ],
-    },
-    {
       source: 'myView p.13',
       title: 'Say each picture name. Does the word have the short a sound?',
       columns: 3,
@@ -107,32 +91,6 @@ export const shortA = defineSection({
       source: 'myView p.21',
       title: 'Write a to finish the words in the sentence.',
       items: [fill('T___m is a c___t.', 'a', NOT_A)],
-    },
-    {
-      source: 'myView p.39',
-      title: 'Blend and read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('sat', ['Sam', 'mat']),
-        listen('Tam', ['Sam', 'am']),
-        listen('mat', ['at', 'Tam']),
-        listen('am', ['at', 'Sam']),
-        listen('at', ['am', 'sat']),
-        listen('Sam', ['sat', 'Tam']),
-      ],
-    },
-    {
-      source: 'myView p.43',
-      title: 'Read these words. Tap 🔊 and tap the word you hear.',
-      columns: 3,
-      items: [
-        listen('am', ['Sam', 'Tam']),
-        listen('Sam', ['am', 'Tam']),
-        listen('Tam', ['am', 'Sam']),
-        listen('at', ['sat', 'mat']),
-        listen('sat', ['at', 'mat']),
-        listen('mat', ['at', 'sat']),
-      ],
     },
     {
       source: 'myView p.43',

@@ -77,35 +77,22 @@ const chunk = (
 // ---------------------------------------------------------------------------
 
 /**
- * Every word from the workbook word lists (p.2 rule box, sort banks and picture
- * words; p.3 word bank and color-code grid; p.4 ① cards and ③ sort bank; p.5 ⑤ rows;
- * p.6 rule box, activity 1 and activity 4; p.9 Part C verbs; p.14 rule box and match
- * words; p.15–16 adjectives; p.17 noun table), interleaved so that two words in a row
- * are never the same kind.
+ * The words from the workbook's "circle the noun / verb" lists (p.4 ① cards,
+ * p.6 activity 1), asked as noun / verb / adjective so the page doesn't give it away.
  */
 const kindWords: [string, WordKind][] = [
-  ['dog', 'noun'], ['jump', 'verb'], ['school', 'noun'], ['red', 'adjective'],
-  ['nurse', 'noun'], ['run', 'verb'], ['girl', 'noun'], ['happy', 'adjective'],
-  ['park', 'noun'], ['ride', 'verb'], ['bus', 'noun'], ['tall', 'adjective'],
-  ['teacher', 'noun'], ['read', 'verb'], ['boat', 'noun'], ['tiny', 'adjective'],
-  ['cat', 'noun'], ['wave', 'verb'], ['banana', 'noun'], ['big', 'adjective'],
-  ['store', 'noun'], ['swim', 'verb'], ['crayon', 'noun'], ['small', 'adjective'],
-  ['boy', 'noun'], ['eat', 'verb'], ['peach', 'noun'], ['blue', 'adjective'],
-  ['garden', 'noun'], ['stop', 'verb'], ['apartment', 'noun'], ['sad', 'adjective'],
-  ['scooter', 'noun'], ['sing', 'verb'], ['library', 'noun'], ['green', 'adjective'],
-  ['pencil', 'noun'], ['walk', 'verb'], ['playground', 'noun'], ['yellow', 'adjective'],
-  ['bike', 'noun'], ['dig', 'verb'], ['flower', 'noun'], ['three', 'adjective'],
-  ['hospital', 'noun'], ['swing', 'verb'], ['lion', 'noun'], ['beautiful', 'adjective'],
-  ['giraffe', 'noun'], ['drive', 'verb'], ['baby', 'noun'], ['busy', 'adjective'],
-  ['bird', 'noun'], ['sleep', 'verb'], ['apple', 'noun'], ['pretty', 'adjective'],
-  ['mom', 'noun'], ['dance', 'verb'], ['dad', 'noun'], ['kick', 'verb'],
-  ['house', 'noun'], ['draw', 'verb'], ['tree', 'noun'], ['sit', 'verb'],
-  ['cupcake', 'noun'], ['listen', 'verb'], ['car', 'noun'], ['play', 'verb'],
+  ['nurse', 'noun'], ['read', 'verb'], ['dog', 'noun'], ['run', 'verb'],
+  ['boat', 'noun'], ['jump', 'verb'], ['cat', 'noun'], ['ride', 'verb'],
+  ['crayon', 'noun'], ['wave', 'verb'], ['park', 'noun'], ['stop', 'verb'],
+  ['peach', 'noun'], ['house', 'noun'], ['bike', 'noun'], ['tree', 'noun'],
 ]
 
-/** Workbook sentences; the kind to find changes from item to item (noun, verb, adjective …). */
+/**
+ * Workbook sentences (p.2 act 3, p.3 paragraph, p.6 act 3, p.7 paragraph, p.8 A–B,
+ * p.14 act 1, p.15 act 1), each asking for the kind its page asks for; the kind
+ * changes from item to item.
+ */
 const findInSentence: ItemInput[] = [
-  // myGrammar p.2 act 3 · p.8 A · p.14 act 1 · p.2 · p.6 act 3 · p.15 act 1 · p.2 · p.8 A
   tap('noun', 'The boy rides a bike.', ['boy', 'bike']),
   tap('verb', 'Dad cooks dinner for our family.', ['cooks']),
   tap('adjective', 'I ride my red bike.', ['red']),
@@ -114,12 +101,9 @@ const findInSentence: ItemInput[] = [
   tap('adjective', 'A happy girl walks to school.', ['happy']),
   tap('noun', 'My neighbor has a dog.', ['neighbor', 'dog']),
   tap('verb', 'Cathy runs to school every morning.', ['runs']),
-  // p.14 act 1 · p.2 · p.8 A · p.14 rule box · p.14 · p.6 · p.15 · p.3 paragraph
   tap('adjective', 'We play at the big playground.', ['big']),
   tap('noun', 'The bus stops near the store.', ['bus', 'store']),
   tap('verb', 'We visit the community center on Saturdays.', ['visit']),
-  tap('adjective', 'The green tree is next to the tall building.', ['green', 'tall']),
-  tap('noun', 'Mom has a blue bag.', ['Mom', 'bag']),
   tap('verb', 'Kids play at the park.', ['play']),
   tap('adjective', 'The tall tree stands near the busy road.', ['tall', 'busy']),
   tap(
@@ -129,10 +113,8 @@ const findInSentence: ItemInput[] = [
     'Find them all!',
     ['community'],
   ),
-  // p.6 act 3 · p.14 · p.8 A · p.7 paragraph · p.15 · p.8 A · p.6 · p.14
   tap('verb', 'Mom shops at the store.', ['shops']),
   tap('adjective', 'Mom has a blue bag.', ['blue']),
-  tap('noun', 'Dad cooks dinner for our family.', ['Dad', 'dinner', 'family']),
   tap(
     'verb',
     'Henry rides around the block. He waves to his mom. Kids play in the sand. Big trucks push dirt down the street.',
@@ -140,21 +122,11 @@ const findInSentence: ItemInput[] = [
     '(There are 4 to find!)',
   ),
   tap('adjective', 'The red brick houses look beautiful.', ['red', 'beautiful'], '', ['brick']),
-  tap('noun', 'The boys play tennis after school.', ['boys', 'tennis', 'school']),
   tap('verb', 'The bus stops at the corner.', ['stops']),
   tap('adjective', 'The small dog runs fast.', ['small']),
-  // p.6 · p.8 A · p.15 · p.15 · p.8 A · p.7 paragraph · p.14 · p.8 B story
-  tap('noun', 'Mom shops at the store.', ['Mom', 'store']),
   tap('verb', 'The boys play tennis after school.', ['play']),
   tap('adjective', 'My pretty teacher gives us fun homework.', ['pretty', 'fun']),
-  tap('noun', 'The tall tree stands near the busy road.', ['tree', 'road']),
   tap('verb', 'She rides her bike in the park.', ['rides']),
-  tap(
-    'adjective',
-    'Henry rides around the block. He waves to his mom. Kids play in the sand. Big trucks push dirt down the street.',
-    ['Big'],
-  ),
-  tap('noun', 'The small dog runs fast.', ['dog']),
   tap(
     'verb',
     'Every morning, Emma walks to school. She sees her friends on the way. They talk and laugh together. At school, Emma opens her backpack and takes out her books.',
@@ -202,7 +174,7 @@ export const grammarFind = defineSection({
       kindWords.map(([w, k]) => wordKind(w, k)),
       10,
       {
-        source: 'myGrammar p.2–9, 14–17',
+        source: 'myGrammar p.4, 6',
         title: 'What kind of word is it? A noun names a person, place, animal, or thing. A verb is an action word. An adjective tells more about a noun.',
         columns: 2,
       },

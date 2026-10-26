@@ -115,10 +115,7 @@ export function MixedQuiz({
   onNew: () => void
 }) {
   const { progress } = useProgress()
-  const items = useMemo(
-    () => pickMix(sections, size, seed, open),
-    [sections, size, seed, open],
-  )
+  const items = useMemo(() => pickMix(sections, size, seed, open), [sections, size, seed, open])
   const [index, setIndex] = useState(0)
   const [showResults, setShowResults] = useState(false)
   useEffect(() => {
@@ -130,34 +127,66 @@ export function MixedQuiz({
   const answered = results.filter(Boolean).length
   const current = items[index]
 
-  const dots = (
-    <nav className="mt-3 flex flex-wrap gap-2">
-      {items.map((m, i) => {
-        const r = results[i]
-        const tone =
-          r === 'correct' || r === 'done'
-            ? 'border-emerald-500 bg-emerald-100'
-            : r === 'wrong'
-              ? 'border-rose-500 bg-rose-100'
-              : 'border-slate-300 bg-white'
-        return (
-          <button
-            key={m.item.id}
-            type="button"
-            aria-label={`Question ${i + 1}`}
-            onClick={() => {
-              setIndex(i)
-              setShowResults(false)
-            }}
-            className={`h-11 w-11 shrink-0 rounded-full border-2 text-lg font-semibold ${
-              i === index && !showResults ? 'ring-4 ring-indigo-300' : ''
-            } ${tone}`}
-          >
-            {i + 1}
-          </button>
-        )
-      })}
-    </nav>
+  const go = (i: number) => {
+    setIndex(i)
+    setShowResults(false)
+  }
+  const mark = (r: string | undefined) =>
+    r === 'correct' || r === 'done' ? ' ✅' : r === 'wrong' ? ' ❌' : ''
+  const RESULTS = -1
+
+  // Compact navigation: ◀ [dropdown] ▶ and a thin progress bar (fits any number of questions).
+  const nav = (
+    <>
+      <div className="mt-2 flex items-center gap-2">
+        <Btn
+          disabled={showResults ? false : index === 0}
+          onClick={() => go(showResults ? items.length - 1 : index - 1)}
+        >
+          ◀
+        </Btn>
+        <select
+          aria-label="Go to question"
+          value={showResults ? RESULTS : index}
+          onChange={(e) => {
+            const v = Number(e.target.value)
+            if (v === RESULTS) setShowResults(true)
+            else go(v)
+          }}
+          className="min-h-12 flex-1 rounded-xl border-2 border-slate-300 bg-white px-3 text-lg"
+        >
+          {items.map((m, i) => (
+            <option key={m.item.id} value={i}>
+              Question {i + 1} of {items.length}
+              {mark(results[i])}
+            </option>
+          ))}
+          <option value={RESULTS}>🏁 My score</option>
+        </select>
+        <Btn
+          disabled={showResults}
+          onClick={() => (index < items.length - 1 ? go(index + 1) : setShowResults(true))}
+        >
+          ▶
+        </Btn>
+      </div>
+      <div className="mt-2 flex h-2 gap-px overflow-hidden rounded-full" aria-hidden>
+        {results.map((r, i) => (
+          <span
+            key={i}
+            className={`flex-1 ${
+              r === 'correct' || r === 'done'
+                ? 'bg-emerald-500'
+                : r === 'wrong'
+                  ? 'bg-rose-500'
+                  : i === index && !showResults
+                    ? 'bg-indigo-400'
+                    : 'bg-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+    </>
   )
 
   return (
@@ -170,7 +199,7 @@ export function MixedQuiz({
             {good}/{items.length}
           </span>
         </div>
-        {dots}
+        {nav}
       </header>
 
       {showResults || !current ? (
@@ -188,9 +217,7 @@ export function MixedQuiz({
           number={index + 1}
           isLast={index === items.length - 1}
           onBack={index > 0 ? () => setIndex(index - 1) : undefined}
-          onNext={() =>
-            index < items.length - 1 ? setIndex(index + 1) : setShowResults(true)
-          }
+          onNext={() => (index < items.length - 1 ? setIndex(index + 1) : setShowResults(true))}
         />
       )}
     </main>
@@ -242,7 +269,10 @@ function Step({
           className="relative min-h-12 overflow-hidden rounded-xl bg-indigo-600 px-5 text-lg font-semibold text-white active:bg-indigo-700"
         >
           {autoNext && (
-            <span aria-hidden className="anim-countdown absolute inset-0 origin-left bg-indigo-400" />
+            <span
+              aria-hidden
+              className="anim-countdown absolute inset-0 origin-left bg-indigo-400"
+            />
           )}
           <span className="relative">
             {isLast ? '🏁 See my score' : result ? 'Next →' : 'Skip →'}
@@ -276,12 +306,12 @@ function Results({
       </p>
       {answered < total && (
         <p className="mt-2 text-xl text-slate-600">
-          {total - answered} not answered yet — tap a number above to go back.
+          {total - answered} not answered yet — pick a question in the list above to go back.
         </p>
       )}
       {answered > good && (
         <p className="mt-2 text-xl text-slate-600">
-          Red numbers are not right yet. Tap one to try it again!
+          Questions marked ❌ in the list above are not right yet. Try them again!
         </p>
       )}
       <div className="mt-6 flex flex-wrap justify-center gap-3">
