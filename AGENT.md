@@ -26,14 +26,15 @@ src/
     index.tsx           "/" lists all exams (reads src/exams/*/meta.ts)
     <slug>.tsx          One route per exam, loads src/exams/<slug>/ExamPage
   components/quiz/      Reusable exam UI — use it for every exam
-    types.ts            Item types (choice / match / write / predict / select / order) + defineSection()
+    types.ts            Item types (choice / match / write / predict / select / order / multi) + defineSection()
     QuizExam.tsx        Section grid (grouped) + part-by-part section view
-    MixedQuiz.tsx       Mixed review: N questions spread evenly over groups/sections/parts
-    MixPicker.tsx       Mixed review setup: tick sections (default all), optional open writing/drawing tasks, pick a size
+    MixedQuiz.tsx       Mixed review: N questions spread evenly over groups/sections/parts; score + Blankie Bear
+    MixPicker.tsx       Mixed review setup: tick sections (default all), optional handwriting, done memory, pick a size
     questions.tsx       Question renderers
     HandwritingPad.tsx  Canvas for Apple Pencil / finger writing (palm rejection)
-    progress.ts         Per-exam results in localStorage (every result also triggers a celebration)
-  components/celebrate/ Correct/wrong scenes + Web Audio sounds (ported from kcis-grade1-vocaburary)
+    progress.ts         Per-exam results in localStorage (every result also triggers a celebration) + mixed-test done memory
+  components/celebrate/ Correct/wrong scenes + Web Audio sounds (ported from kcis-grade1-vocaburary, + 20 new)
+  components/bear/      被被熊 Blankie Bear (ported): flies in when a test is finished, cheers by score, draggable
   exams/
     types.ts            ExamMeta type
     index.ts            Collects all meta via import.meta.glob
@@ -66,6 +67,9 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 - **Source material** (`test-raw-material/`) is read-only: don't modify it.
 - **Include the workbook's questions**: every question in the source workbooks goes into the exam, in a part marked with its `source` (e.g. `IT LAW p.20`) and listed before the extra practice parts. Fix obvious typos. Then add new questions for variety.
 - **No spoilers on one page**: when a later question's text reveals an earlier answer (e.g. the next part of a prediction story), put it in a separate part.
+- **No give-aways**: a question must not tell its answer. Directions don't name the answer ("Write e to finish…"), options don't differ only in capital letters, no "say the picture name" without a picture, no printing the word whose sound is asked. In the mixed test the section title and the directions are shown above each question, so sections that test a sound mix all the sounds (group by skill, not by unit).
+- **Handwriting is one group**: every `write` item (spelling, sentences, drawings) is only in the mixed test when "✍️ Writing & drawing" is ticked; everything else is answered by tapping.
+- **Vocabulary vs. story**: questions that need the story (its characters, places, pictures) go in the story's `readFirst` section, not in a vocabulary section.
 - **Answers come from the content, not the photos**: the child's handwritten answers in the photos may be wrong. Work out the correct answer yourself.
 - **Language**: UI, questions, and docs are all in English.
 - **🔊 Read-aloud only when needed**: the kids are practicing reading, so don't read questions, sentences or stories aloud. Set `speak` only when sound is the task (listen-and-pick, dictation, picture names in phonics).
@@ -73,6 +77,8 @@ test-raw-material/<slug>/   Source material for that exam (read-only input)
 - **Target device**: iPad (portrait and landscape). Touch targets ≥ 48 px, text ≥ 20 px.
 - **Grade level**: questions must match the source workbook's difficulty (KCIS Grade 1 so far) and stay inside the test guide's scope.
 - **Item ids** come from position (`section/part/index`). When inserting or reordering parts, bump the version in `storageKey` (`components/quiz/progress.ts`) so old results don't land on the wrong items.
+- **iPad audio**: Web Audio is muted by iPadOS Silent mode and suspended/interrupted until a tap; `celebrate/audio.ts` handles it (audioSession `playback`, resume + unlock on every tap). Always get the context through `audio()`.
+- **Formatting**: there is no Prettier config; don't run Prettier (its defaults add semicolons and reformat whole files). Match the surrounding style by hand.
 - **React effects**: always use a block body (`useEffect(() => { f() }, …)`). Concise arrows that return a value crash with "destroy is not a function".
 
 ## Deployment

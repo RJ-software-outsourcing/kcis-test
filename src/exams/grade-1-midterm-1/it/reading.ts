@@ -186,6 +186,16 @@ export const blackout = defineSection({
       ],
     },
     {
+      source: 'myView p.50',
+      title:
+        'A noun names a person, animal, or thing. Edit the sentences about the story by writing the best noun from the box: radio, boy, pet. (Picture: in the blackout, a boy with a flashlight peeks in at a woman with a radio and her cat.)',
+      items: [
+        choice('The ___ can help.', 'boy', ['radio', 'pet']),
+        choice('He grabs a ___.', 'radio', ['boy', 'pet']),
+        choice('He helps the ___.', 'pet', ['radio', 'boy']),
+      ],
+    },
+    {
       source: 'myView p.48',
       title: 'Draw the main character of The Blackout. Look back at the text.',
       items: [
@@ -333,6 +343,18 @@ export const henry = defineSection({
           QUESTIONS[1],
           QUESTIONS[2],
         ]),
+      ],
+    },
+    {
+      source: 'myView p.82',
+      title:
+        'Use the words from the box to finish the sentences about the places Henry rides: sand, block, street, corner.',
+      columns: 2,
+      items: [
+        choice('Henry can ride around the ___.', 'block', ['sand', 'street', 'corner']),
+        choice('He rides his bike down the ___.', 'street', ['sand', 'block', 'corner']),
+        choice('At the ___ there is a line of people.', 'corner', ['sand', 'block', 'street']),
+        choice('Henry sees kids playing in the ___.', 'sand', ['block', 'street', 'corner']),
       ],
     },
     {

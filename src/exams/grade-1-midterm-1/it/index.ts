@@ -1,20 +1,14 @@
-import { qu } from './qu'
+import { letters } from './letters'
 import { blackout, henry, makingMap } from './reading'
-import { shortA } from './shortA'
-import { shortE } from './shortE'
-import { shortI } from './shortI'
-import { shortO } from './shortO'
-import { shortU } from './shortU'
+import { spelling } from './spelling'
 import { vocabBlackout, vocabHenry, vocabMap } from './vocab'
+import { vowels } from './vowels'
 import { myWords } from './words'
 
 export const itSections = [
-  shortA,
-  shortI,
-  shortO,
-  shortE,
-  shortU,
-  qu,
+  vowels,
+  letters,
+  spelling,
   myWords,
   vocabBlackout,
   vocabHenry,

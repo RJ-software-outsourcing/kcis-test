@@ -58,17 +58,32 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   })
 }
 
-export function speak(text: string) {
+/** Reads `text` aloud; `pitch`/`rate` change the voice (e.g. Blankie Bear's high, cute voice). */
+export function speak(text: string, { pitch = 1, rate = 0.9 }: { pitch?: number; rate?: number } = {}) {
   if (!('speechSynthesis' in window)) return
   if (!voice) voice = pickVoice()
   const u = new SpeechSynthesisUtterance(text)
   u.lang = 'en-US'
   if (voice) u.voice = voice
-  u.rate = 0.9
+  u.rate = rate
+  u.pitch = pitch
   window.speechSynthesis.cancel()
   window.speechSynthesis.speak(u)
 }
 
+/**
+ * iOS only lets speech start from a tap. The first tap anywhere speaks a silent utterance,
+ * so speech started later by a timer (Blankie Bear's cheer) is allowed.
+ */
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  const prime = () => {
+    const u = new SpeechSynthesisUtterance(' ')
+    u.volume = 0
+    window.speechSynthesis.speak(u)
+  }
+  window.addEventListener('touchend', prime, { capture: true, once: true })
+  window.addEventListener('click', prime, { capture: true, once: true })
+}
 
 export function SpeakButton({ text, label }: { text: string; label?: string }) {
   return (

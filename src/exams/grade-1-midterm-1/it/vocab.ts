@@ -1,5 +1,5 @@
 import { defineSection } from '../../../components/quiz/types'
-import { choice, lawVocabParts } from '../helpers'
+import { lawVocabParts } from '../helpers'
 
 const blackout2 = lawVocabParts({
   pages: ['IT LAW p.8', 'IT LAW p.9'],
@@ -37,7 +37,7 @@ const blackout2 = lawVocabParts({
 export const vocabBlackout = defineSection({
   id: 'vocab-blackout',
   title: 'The Blackout words',
-  subtitle: 'lights, storm, flashlight, radio, battery … · nouns',
+  subtitle: 'lights, storm, flashlight, radio, battery …',
   emoji: '🔦',
   group: 'Vocabulary',
   parts: [
@@ -65,16 +65,6 @@ export const vocabBlackout = defineSection({
       },
     }),
     ...blackout2,
-    {
-      source: 'myView p.50',
-      title:
-        'A noun names a person, animal, or thing. Edit the sentences by writing the best noun from the box: radio, boy, pet. (Picture: in the blackout, a boy with a flashlight peeks in at a woman with a radio and her cat.)',
-      items: [
-        choice('The ___ can help.', 'boy', ['radio', 'pet']),
-        choice('He grabs a ___.', 'radio', ['boy', 'pet']),
-        choice('He helps the ___.', 'pet', ['radio', 'boy']),
-      ],
-    },
   ],
 })
 
@@ -131,18 +121,6 @@ export const vocabHenry = defineSection({
         unhook: 'To take off a hook.',
       },
     }),
-    {
-      source: 'myView p.82',
-      title:
-        'Use the words from the box to finish the sentences about the places Henry rides: sand, block, street, corner.',
-      columns: 2,
-      items: [
-        choice('Henry can ride around the ___.', 'block', ['sand', 'street', 'corner']),
-        choice('He rides his bike down the ___.', 'street', ['sand', 'block', 'corner']),
-        choice('At the ___ there is a line of people.', 'corner', ['sand', 'block', 'street']),
-        choice('Henry sees kids playing in the ___.', 'sand', ['block', 'street', 'corner']),
-      ],
-    },
   ],
 })
 

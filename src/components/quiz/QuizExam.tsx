@@ -1,11 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { BearCheer } from '../bear/BearCheer'
 import { CelebrationHost } from '../celebrate'
 import { clearPads } from './HandwritingPad'
 import { MixPicker } from './MixPicker'
 import { MixedQuiz, clearMix } from './MixedQuiz'
-import { ExamIdContext, useProgress } from './progress'
+import { ExamIdContext, useMixDone, useProgress } from './progress'
 import { Question } from './questions'
 import type { Section } from './types'
 import { Btn } from './util'
@@ -105,6 +106,7 @@ function Inner({
   if (mode === 'mixed' && size && seed !== undefined)
     return (
       <MixedQuiz
+        key={seed}
         sections={pick ? sections.filter((s) => pick.includes(s.id)) : sections}
         size={size}
         seed={seed}
@@ -132,6 +134,7 @@ function Inner({
     )
   return (
     <SectionView
+      key={list[idx].id}
       section={list[idx]}
       next={list[idx + 1]}
       part={Math.min(Math.max(part, 0), list[idx].parts.length - 1)}
@@ -177,6 +180,7 @@ function Landing({
   onStartMix: (n: number, pick?: string[], open?: boolean) => void
 }) {
   const { clear } = useProgress()
+  const mixDone = useMixDone()
   const sectionMode = mode === 'extra' ? 'extra' : 'workbook'
   const cards = mixOnly ? sections.filter((s) => s.readFirst) : sections
   const wb = useStats('', (mixOnly ? cards : workbook).flatMap(itemIds))
@@ -266,6 +270,7 @@ function Landing({
             if (confirm('Clear all answers for this exam?')) {
               clear('')
               clearPads('')
+              mixDone.clear()
             }
           }}
         >
@@ -322,7 +327,9 @@ function SectionView({
 }) {
   const { clear } = useProgress()
   const [resetKey, setResetKey] = useState(0)
-  const { good, total } = useStats(section.id, itemIds(section))
+  const { answered, good, total } = useStats(section.id, itemIds(section))
+  // Blankie Bear cheers when the last question of the section is answered on this visit.
+  const [wasComplete] = useState(answered === total)
   const p = section.parts[part]
   const isLast = part === section.parts.length - 1
   const Aside = p.aside
@@ -415,6 +422,8 @@ function SectionView({
           ))}
         </div>
       </div>
+
+      {!wasComplete && answered === total && <BearCheer correct={good} total={total} />}
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
         {part > 0 && <Btn onClick={() => onNavigate(section.id, part - 1)}>← Part {part}</Btn>}

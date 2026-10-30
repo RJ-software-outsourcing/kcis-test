@@ -6,6 +6,7 @@ import type {
   ChoiceItem,
   Item,
   MatchItem,
+  MultiItem,
   OrderItem,
   PredictItem,
   SelectItem,
@@ -29,6 +30,8 @@ export function Question({ item, number }: { item: Item; number: number }) {
       return <Select item={item} number={number} />
     case 'order':
       return <Order item={item} number={number} />
+    case 'multi':
+      return <Multi item={item} number={number} />
   }
 }
 
@@ -631,6 +634,104 @@ function Order({ item, number }: { item: WithId<OrderItem>; number: number }) {
               }}
             >
               ↺ Try again
+            </Btn>
+          </>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+function Multi({ item, number }: { item: WithId<MultiItem>; number: number }) {
+  const { progress, setResult } = useProgress()
+  const done = progress[item.id] === 'correct'
+  const [picked, setPicked] = useState<(string | undefined)[]>(() =>
+    done ? item.rows.map((r) => r.answer) : [],
+  )
+  const [checked, setChecked] = useState(done)
+  const isRight = (i: number) => picked[i] === item.rows[i].answer
+  const allPicked = item.rows.every((_, i) => picked[i])
+  const allRight = item.rows.every((_, i) => isRight(i))
+
+  const pick = (i: number, o: string) => {
+    if (checked) return
+    const next = [...picked]
+    next[i] = o
+    setPicked(next)
+  }
+  const check = () => {
+    setChecked(true)
+    setResult(item.id, allRight ? 'correct' : 'wrong')
+  }
+  const retry = () => {
+    setPicked(picked.map((p, i) => (isRight(i) ? p : undefined)))
+    setChecked(false)
+    setResult(item.id, undefined)
+  }
+
+  return (
+    <Card number={number} result={checked ? (allRight ? 'correct' : 'wrong') : undefined}>
+      {item.prompt && <p className="mb-3 text-2xl leading-relaxed">{item.prompt}</p>}
+      <div className="space-y-3">
+        {item.rows.map((row, i) => {
+          const options = row.options ?? item.options ?? []
+          const frame = checked
+            ? isRight(i)
+              ? 'border-emerald-300 bg-emerald-50/50'
+              : 'border-rose-300 bg-rose-50/50'
+            : 'border-slate-200'
+          return (
+            <div key={i} className={`flex flex-wrap items-center gap-3 rounded-xl border-2 p-3 ${frame}`}>
+              <span className="w-6 text-xl font-bold text-slate-400">{String.fromCharCode(97 + i)}.</span>
+              {row.speak && <SpeakButton text={row.speak} />}
+              {row.prompt && (
+                <span className="text-2xl leading-relaxed">
+                  <WithBlanks text={row.prompt} fill={checked && isRight(i) ? row.answer : undefined} />
+                </span>
+              )}
+              <span className="flex flex-1 flex-wrap justify-end gap-2">
+                {options.map((o) => {
+                  const on = picked[i] === o
+                  const cls = !on
+                    ? checked
+                      ? 'border-slate-200 text-slate-400'
+                      : 'border-slate-300 bg-white active:bg-indigo-50'
+                    : !checked
+                      ? 'border-indigo-600 bg-indigo-100 text-indigo-900'
+                      : isRight(i)
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
+                        : 'border-rose-500 bg-rose-50 text-rose-800'
+                  return (
+                    <button
+                      key={o}
+                      type="button"
+                      onClick={() => pick(i, o)}
+                      className={`min-h-14 min-w-14 rounded-xl border-2 px-4 text-2xl ${cls}`}
+                    >
+                      {o}
+                    </button>
+                  )
+                })}
+              </span>
+              {checked && <span className="text-xl">{isRight(i) ? '✅' : '❌'}</span>}
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xl">
+        {!checked && (
+          <Btn tone="primary" onClick={check} disabled={!allPicked}>
+            Check
+          </Btn>
+        )}
+        {checked && allRight && (
+          <span className="font-semibold text-emerald-700">✅ All correct!</span>
+        )}
+        {checked && !allRight && (
+          <>
+            <span className="font-semibold text-rose-700">❌ Some are not right yet.</span>
+            <Btn tone="bad" onClick={retry}>
+              ↺ Fix the wrong ones
             </Btn>
           </>
         )}

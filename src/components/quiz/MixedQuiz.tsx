@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { BearCheer } from '../bear/BearCheer'
 import { clearPads } from './HandwritingPad'
-import { useProgress } from './progress'
+import { ExamIdContext, useMixDone, useProgress } from './progress'
 import { Question } from './questions'
 import type { Item, Section } from './types'
 import { Btn, seededRandom, shuffle } from './util'
@@ -12,39 +13,37 @@ export const MIX_SIZES = [10, 20, 30, 50] as const
 
 interface MixItem {
   item: Item
+  /** The item's id in its section (the mix renumbers ids to `mix/<n>`) */
+  origId: string
   directions: string
   section: Section
 }
 
-/** An open task: handwriting or drawing with no answer to check against ("Done"). */
-const isOpen = (it: Item) => it.kind === 'write' && !it.answer
+/** Answered with Apple Pencil or a finger (spelling, sentences, drawings). */
+const isWriting = (it: Item) => it.kind === 'write'
 
 /**
- * Items that make sense on their own: auto-checked or with an answer to self-check
- * against; open writing/drawing tasks only when `open` is set.
+ * Items that make sense on their own; handwriting/drawing tasks only when `open`
+ * ("✍️ Writing & drawing") is ticked.
  */
-const eligible = (it: Item, open = false) => it.kind !== 'predict' && (open || !isOpen(it))
+const eligible = (it: Item, open = false) => it.kind !== 'predict' && (open || !isWriting(it))
+
+const poolItems = (s: Section, open = false) =>
+  s.readFirst ? [] : s.parts.flatMap((p) => (p.aside ? [] : p.items.filter((i) => eligible(i, open))))
 
 export const mixableSections = (sections: Section[], open = false) =>
-  sections.filter(
-    (s) => !s.readFirst && s.parts.some((p) => !p.aside && p.items.some((i) => eligible(i, open))),
-  )
+  sections.filter((s) => poolItems(s, open).length > 0)
 
-/** Number of questions a section adds to the mixed test. */
-export const sectionPoolSize = (s: Section, open = false) =>
-  s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter((i) => eligible(i, open)).length), 0)
+/** Number of questions a section adds to the mixed test (leaving out `done` ones). */
+export const sectionPoolSize = (s: Section, open = false, done?: Set<string>) =>
+  poolItems(s, open).filter((i) => !done?.has(i.id)).length
 
-/** Number of open writing/drawing tasks in the sections that can be mixed. */
-export const openTaskCount = (sections: Section[]) =>
-  sectionsWithoutStory(sections).reduce(
-    (n, s) => n + s.parts.reduce((m, p) => m + (p.aside ? 0 : p.items.filter(isOpen).length), 0),
-    0,
-  )
+/** Number of handwriting/drawing tasks in the sections that can be mixed. */
+export const writingTaskCount = (sections: Section[]) =>
+  sections.reduce((n, s) => n + poolItems(s, true).filter(isWriting).length, 0)
 
-const sectionsWithoutStory = (sections: Section[]) => sections.filter((s) => !s.readFirst)
-
-export const mixPoolSize = (sections: Section[], open = false) =>
-  mixableSections(sections, open).reduce((n, s) => n + sectionPoolSize(s, open), 0)
+export const mixPoolSize = (sections: Section[], open = false, done?: Set<string>) =>
+  sections.reduce((n, s) => n + sectionPoolSize(s, open, done), 0)
 
 /** Round-robin over the queues until `n` items are taken (or all queues are empty). */
 function roundRobin<T>(queues: T[][], n: number): T[] {
@@ -60,7 +59,13 @@ function roundRobin<T>(queues: T[][], n: number): T[] {
  * categories), inside a group over its sections, and inside a section over its parts.
  * The same seed always gives the same questions.
  */
-export function pickMix(sections: Section[], n: number, seed: number, open = false): MixItem[] {
+export function pickMix(
+  sections: Section[],
+  n: number,
+  seed: number,
+  open = false,
+  done?: Set<string>,
+): MixItem[] {
   const random = seededRandom(seed)
   const perSection = (section: Section) => {
     const parts = section.parts
@@ -68,8 +73,8 @@ export function pickMix(sections: Section[], n: number, seed: number, open = fal
       .map((p) =>
         shuffle(
           p.items
-            .filter((i) => eligible(i, open))
-            .map((item) => ({ item, directions: p.title, section })),
+            .filter((i) => eligible(i, open) && !done?.has(i.id))
+            .map((item) => ({ item, origId: item.id, directions: p.title, section })),
           random,
         ),
       )
@@ -96,6 +101,37 @@ export function clearMix(clear: (prefix: string) => void) {
   clearPads(MIX_PREFIX)
 }
 
+// The questions of the mix in progress, so a reload shows the same ones even though the
+// "done" memory has changed since they were picked.
+const currentKey = (examId: string) => `kcis:${examId}:mix-current`
+
+function restoreMix(examId: string, seed: number, sections: Section[]): MixItem[] | undefined {
+  try {
+    const saved = JSON.parse(localStorage.getItem(currentKey(examId)) ?? 'null') as {
+      seed: number
+      ids: string[]
+    } | null
+    if (saved?.seed !== seed) return undefined
+    const all = new Map<string, Omit<MixItem, 'item'> & { item: Item }>()
+    for (const section of sections)
+      for (const p of section.parts)
+        for (const item of p.items) all.set(item.id, { item, origId: item.id, directions: p.title, section })
+    const found = saved.ids.map((id) => all.get(id))
+    if (found.some((m) => !m)) return undefined
+    return found.map((m, i) => ({ ...m!, item: { ...m!.item, id: `${MIX_PREFIX}${i}` } }))
+  } catch {
+    return undefined
+  }
+}
+
+function storeMix(examId: string, seed: number, items: MixItem[]) {
+  try {
+    localStorage.setItem(currentKey(examId), JSON.stringify({ seed, ids: items.map((m) => m.origId) }))
+  } catch {
+    // ignore
+  }
+}
+
 export function MixedQuiz({
   sections,
   size,
@@ -114,8 +150,16 @@ export function MixedQuiz({
   onExit: () => void
   onNew: () => void
 }) {
+  const examId = useContext(ExamIdContext)
   const { progress } = useProgress()
-  const items = useMemo(() => pickMix(sections, size, seed, open), [sections, size, seed, open])
+  const mixDone = useMixDone()
+  const [items] = useState(() => {
+    const restored = restoreMix(examId, seed, sections)
+    if (restored) return restored
+    const picked = pickMix(sections, size, seed, open, mixDone.done)
+    storeMix(examId, seed, picked)
+    return picked
+  })
   const [index, setIndex] = useState(0)
   const [showResults, setShowResults] = useState(false)
   useEffect(() => {
@@ -126,6 +170,13 @@ export function MixedQuiz({
   const good = results.filter((r) => r === 'correct' || r === 'done').length
   const answered = results.filter(Boolean).length
   const current = items[index]
+
+  // Remember what was answered right, so the next mix brings new questions.
+  const rightIds = items.filter((_, i) => results[i] === 'correct' || results[i] === 'done').map((m) => m.origId)
+  const rightKey = rightIds.join(',')
+  useEffect(() => {
+    if (rightIds.length) mixDone.add(rightIds)
+  }, [rightKey])
 
   const go = (i: number) => {
     setIndex(i)
@@ -298,8 +349,10 @@ function Results({
 }) {
   const pct = total ? good / total : 0
   const face = pct === 1 ? '🏆' : pct >= 0.8 ? '🌟' : pct >= 0.5 ? '👍' : '💪'
+  // Blankie Bear comes to cheer once every question has an answer.
   return (
     <div className="mt-8 rounded-2xl bg-white p-6 text-center shadow-sm">
+      {total > 0 && answered === total && <BearCheer correct={good} total={total} />}
       <div className="text-8xl">{face}</div>
       <p className="mt-3 text-4xl font-bold">
         {good} / {total} correct

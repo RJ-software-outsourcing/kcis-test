@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
 import type { PartInput } from '../../../components/quiz/types'
-import { choice, select, write } from '../helpers'
+import { choice, write } from '../helpers'
 
 const dictation = (word: string) => write(undefined, word, { speak: word })
 /** Two blanks: options like 'is … his', filled in one by one. */
@@ -31,17 +31,6 @@ export const myWords = defineSection({
         choice('I ___ Sam.', 'see', ['is', 'his']),
         two('Sam ___ at ___ mat.', 'is', 'his', ['his … is', 'see … I']),
         choice('I am at ___ mat.', 'a', ['I', 'see']),
-      ],
-    },
-    {
-      source: 'Phonics p.4',
-      title: 'Read the sentences. Tap the words that are in the box: I, a, see, his, is',
-      columns: 2,
-      items: [
-        select('Tap the box words.', 'I see Sam.', ['I', 'see']),
-        select('Tap the box words.', 'I see a mat.', ['I', 'see', 'a']),
-        select('Tap the box words.', 'Is Sam at his mat?', ['Is', 'his']),
-        select('Tap the box words.', 'Sam is at his mat.', ['is', 'his']),
       ],
     },
     // we, do, the, one, like

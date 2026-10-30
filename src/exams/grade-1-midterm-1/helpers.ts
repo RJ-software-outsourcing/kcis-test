@@ -15,25 +15,6 @@ export const choice = (
   extra: Partial<ChoiceItem> = {},
 ): ChoiceItem => ({ kind: 'choice', prompt, options: [answer, ...others], answer, ...extra })
 
-/** Picture (emoji) question; the picture's name is shown after answering. */
-export const pic = (
-  picture: string,
-  word: string,
-  prompt: string | undefined,
-  answer: string,
-  others: string[],
-  extra: Partial<ChoiceItem> = {},
-): ChoiceItem => ({
-  kind: 'choice',
-  picture,
-  prompt,
-  speak: word,
-  reveal: `${picture} ${word}`,
-  options: [answer, ...others],
-  answer,
-  ...extra,
-})
-
 /** Yes / No, in that order. */
 export const yesNo = (
   prompt: string | undefined,
@@ -46,14 +27,6 @@ export const yesNo = (
   keepOrder: true,
   answer: yes ? 'Yes' : 'No',
   ...extra,
-})
-
-/** 🔊 Listen and pick the word that was read aloud. */
-export const listen = (word: string, others: string[]): ChoiceItem => ({
-  kind: 'choice',
-  speak: word,
-  options: [word, ...others],
-  answer: word,
 })
 
 /** Handwriting. With `answer` the child self-checks; without, it is open-ended ("Done"). */

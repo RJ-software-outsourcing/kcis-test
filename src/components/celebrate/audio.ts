@@ -2,16 +2,52 @@
 
 let ctx: AudioContext | null = null
 
+// iOS/iPadOS put Web Audio in the "ambient" session by default: it is muted by Silent mode
+// (Control Center bell / ringer switch) while speech (🔊) still plays. "playback" makes the
+// effects audible like the speech. Safari 16.4+; ignored elsewhere.
+const session =
+  typeof navigator === 'undefined'
+    ? undefined
+    : (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+if (session) {
+  try {
+    session.type = 'playback'
+  } catch {
+    // ignore
+  }
+}
+
 export function audio(): AudioContext | null {
   if (typeof window === 'undefined' || !('AudioContext' in window)) return null
   try {
     ctx ??= new AudioContext()
-    // iOS starts the context suspended; resuming inside the tap handler unlocks it.
-    if (ctx.state === 'suspended') void ctx.resume()
+    // iOS starts the context "suspended" and moves it to "interrupted" when other audio
+    // (e.g. 🔊 speech) takes over; resuming inside a tap handler brings it back.
+    if (ctx.state !== 'running') void ctx.resume().catch(() => {})
     return ctx
   } catch {
     return null
   }
+}
+
+/**
+ * iOS only unlocks audio from a tap: on every tap, make sure the context is running
+ * (playing a silent buffer the first time), so sounds started later (timers, after
+ * speech) are heard too.
+ */
+function unlock() {
+  const c = audio()
+  if (!c || unlocked) return
+  const src = c.createBufferSource()
+  src.buffer = c.createBuffer(1, 1, 22050)
+  src.connect(c.destination)
+  src.start(0)
+  unlocked = true
+}
+let unlocked = false
+if (typeof window !== 'undefined') {
+  for (const type of ['touchend', 'click', 'keydown'])
+    window.addEventListener(type, unlock, { capture: true, passive: true })
 }
 
 export interface ToneOpts {

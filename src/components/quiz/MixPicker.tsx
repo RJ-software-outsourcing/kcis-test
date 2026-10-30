@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import type { ReactNode } from 'react'
-import { MIX_SIZES, mixPoolSize, mixableSections, openTaskCount, sectionPoolSize } from './MixedQuiz'
-import { ExamIdContext } from './progress'
+import { MIX_SIZES, mixPoolSize, mixableSections, sectionPoolSize, writingTaskCount } from './MixedQuiz'
+import { ExamIdContext, useMixDone } from './progress'
 import type { Section } from './types'
 import { Btn } from './util'
 
@@ -28,7 +28,8 @@ function loadExcluded(examId: string): Set<string> {
 /**
  * Mixed test setup: tick what to include (everything by default), then pick how many
  * questions. `onStart` gets the size, the chosen section ids (undefined = all) and
- * whether open writing/drawing tasks are included (off by default).
+ * whether handwriting/drawing tasks are included (off by default). Questions already
+ * answered right are left out until "Start over" clears that memory.
  */
 export function MixPicker({
   sections,
@@ -47,15 +48,18 @@ export function MixPicker({
       return false
     }
   })
+  const { done, clear } = useMixDone()
   const all = mixableSections(sections, true)
-  const openTasks = openTaskCount(all)
+  const writingTasks = writingTaskCount(all)
   const [excluded, setExcluded] = useState(() => loadExcluded(examId))
   const save = (next: Set<string>) => {
     setExcluded(next)
     store(storageKey(examId), JSON.stringify([...next]))
   }
   const picked = all.filter((s) => !excluded.has(s.id))
-  const pool = mixPoolSize(picked, open)
+  const total = mixPoolSize(picked, open)
+  const pool = mixPoolSize(picked, open, done)
+  const doneCount = total - pool
   const groups = all.reduce<{ name?: string; sections: Section[] }[]>((acc, s) => {
     const g = acc.find((x) => x.name === s.group)
     if (g) g.sections.push(s)
@@ -113,7 +117,11 @@ export function MixPicker({
                   <span className="flex-1">
                     {s.emoji} {s.title}
                   </span>
-                  <span className="text-base text-slate-500">{sectionPoolSize(s, open)}</span>
+                  <span className="text-base text-slate-500">
+                    {sectionPoolSize(s, open, done)}
+                    {sectionPoolSize(s, open, done) < sectionPoolSize(s, open) &&
+                      ` / ${sectionPoolSize(s, open)}`}
+                  </span>
                 </Check>
               ))}
             </div>
@@ -121,7 +129,7 @@ export function MixPicker({
         )
       })}
 
-      {openTasks > 0 && (
+      {writingTasks > 0 && (
         <div className="mt-5">
           <Check
             checked={open}
@@ -134,25 +142,57 @@ export function MixPicker({
             <span className="flex-1">
               ✍️ Writing &amp; drawing
               <span className="block text-base text-slate-500">
-                Open tasks with no answer key (write a sentence, draw a picture). Tap Done when
-                finished.
+                Questions you answer with Apple Pencil or your finger: spelling, writing words
+                and sentences, drawing. Without this tick, every question is answered by tapping.
               </span>
             </span>
+            <span className="text-base text-slate-500">{writingTasks}</span>
           </Check>
         </div>
       )}
 
-      <p className="mt-5 text-lg font-semibold text-violet-900">How many questions?</p>
-      <div className="mt-2 flex flex-wrap gap-3">
-        {MIX_SIZES.filter((n) => n < pool).map((n) => (
-          <Btn key={n} tone="primary" onClick={() => start(n)}>
-            {n}
+      <div className="mt-5 rounded-xl bg-white p-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="flex-1 text-lg text-violet-900">
+            ✅ Done: <b>{doneCount}</b> of {total} questions
+            <span className="block text-base text-slate-500">
+              Questions you got right don't come back until you start over.
+            </span>
+          </span>
+          <Btn
+            disabled={!done.size}
+            onClick={() => {
+              if (confirm('Start over? All questions will come back.')) clear()
+            }}
+          >
+            ↺ Start over
           </Btn>
-        ))}
-        <Btn tone="primary" disabled={!pool} onClick={() => start(pool)}>
-          All {pool}
-        </Btn>
+        </div>
+        <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full bg-emerald-500"
+            style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }}
+          />
+        </div>
       </div>
+
+      <p className="mt-5 text-lg font-semibold text-violet-900">How many questions?</p>
+      {pool ? (
+        <div className="mt-2 flex flex-wrap gap-3">
+          {MIX_SIZES.filter((n) => n < pool).map((n) => (
+            <Btn key={n} tone="primary" onClick={() => start(n)}>
+              {n}
+            </Btn>
+          ))}
+          <Btn tone="primary" onClick={() => start(pool)}>
+            All {pool}
+          </Btn>
+        </div>
+      ) : (
+        <p className="mt-2 text-lg text-violet-900">
+          🎉 {total ? 'You did every question! Tap “Start over” to practice them again.' : 'Tick something above.'}
+        </p>
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
-import { lawVocabParts } from '../helpers'
+import type { MultiItem } from '../../../components/quiz/types'
+import { choice, lawVocabParts } from '../helpers'
 
 export const vocabGarden = defineSection({
   id: 'vocab-garden',
@@ -123,4 +124,101 @@ export const vocabLook2 = defineSection({
       right: 'The opposite of left.',
     },
   }),
+})
+
+// ---------------------------------------------------------------------------
+// safe · safely · safety — three words from Look Both Ways! that are easy to mix up
+// ---------------------------------------------------------------------------
+
+const SAFE = ['safe', 'safely', 'safety']
+const RULE =
+  'safe = not in danger (I am safe.) · safely = how you do something, in a safe way (Walk safely.) · safety = the thing we learn about: keeping safe (fire safety).'
+
+/** Three sentences; pick safe, safely, or safety for each. */
+const safeRows = (...rows: [sentence: string, answer: string][]): MultiItem => ({
+  kind: 'multi',
+  options: SAFE,
+  rows: rows.map(([prompt, answer]) => ({ prompt, answer })),
+})
+
+export const safeWords = defineSection({
+  id: 'safe-words',
+  title: 'safe · safely · safety',
+  subtitle: 'Which one fits? Learn the difference',
+  emoji: '🦺',
+  group: 'Vocabulary',
+  parts: [
+    {
+      source: 'LT LAW p.12–16',
+      title: `Choose safe, safely, or safety. ${RULE}`,
+      items: [
+        safeRows(
+          ['Wear a helmet to stay ___.', 'safe'],
+          ['Look both ways and cross the street ___.', 'safely'],
+          ['We learned about fire ___ at school.', 'safety'],
+        ),
+        safeRows(
+          ['Ride your bike ___.', 'safely'],
+          ['The park is a ___ place to play.', 'safe'],
+          ['The guard talks to us about road ___.', 'safety'],
+        ),
+        safeRows(
+          ['Our teacher teaches us about water ___.', 'safety'],
+          ['The bus driver drives ___.', 'safely'],
+          ['I feel ___ when I hold Mom’s hand.', 'safe'],
+        ),
+        safeRows(
+          ['Is it ___ to cross the street now?', 'safe'],
+          ['We walk ___ in the hall.', 'safely'],
+          ['A helmet is for your ___.', 'safety'],
+        ),
+        safeRows(
+          ['The kids crossed the road ___.', 'safely'],
+          ['The crossing guard keeps us ___.', 'safe'],
+          ['Buckle up for ___ in the car!', 'safety'],
+        ),
+      ],
+    },
+    {
+      source: 'LT LAW p.12–16',
+      title: `Which sentence is right? ${RULE}`,
+      columns: 2,
+      items: [
+        choice('Tap the right sentence.', 'Cross the street safely.', [
+          'Cross the street safe.',
+          'Cross the street safety.',
+        ]),
+        choice('Tap the right sentence.', 'Wear a helmet to stay safe.', [
+          'Wear a helmet to stay safely.',
+          'Wear a helmet to stay safety.',
+        ]),
+        choice('Tap the right sentence.', 'We learned about fire safety.', [
+          'We learned about fire safe.',
+          'We learned about fire safely.',
+        ]),
+        choice('Tap the right sentence.', 'The park is a safe place.', [
+          'The park is a safely place.',
+          'The park is a safety place.',
+        ]),
+        choice('Tap the right sentence.', 'The kids walk safely to school.', [
+          'The kids walk safety to school.',
+        ]),
+        choice('Tap the right sentence.', 'The guard keeps us safe.', [
+          'The guard keeps us safety.',
+          'The guard keeps us safely.',
+        ]),
+      ],
+    },
+    {
+      source: 'LT LAW p.12–16',
+      title: 'What does the word tell you?',
+      columns: 2,
+      items: [
+        choice('Which word tells HOW you do something?', 'safely', ['safe', 'safety']),
+        choice('Which word means “not in danger”?', 'safe', ['safely', 'safety']),
+        choice('Which word names a thing you learn about, like fire ___?', 'safety', ['safe', 'safely']),
+        choice('“Walk safely.” What does safely tell you?', 'how to walk', ['where to walk', 'who walks']),
+      ],
+    },
+  ],
 })

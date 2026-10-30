@@ -79,7 +79,37 @@ export interface OrderItem {
   vertical?: boolean
 }
 
-export type ItemInput = ChoiceItem | MatchItem | WriteItem | PredictItem | SelectItem | OrderItem
+/** One short question inside a `multi` item. */
+export interface MultiRow {
+  /** Text with an optional `___` blank (filled with the answer once checked right) */
+  prompt?: string
+  /** Text for this row's 🔊 button (listening rows) */
+  speak?: string
+  /** This row's options (defaults to the item's `options`) */
+  options?: string[]
+  answer: string
+}
+
+/**
+ * Several short questions in one card (e.g. three "🔊 Which vowel?" rows, or three
+ * "pick the right verb" sentences). Checked together; right when every row is right.
+ */
+export interface MultiItem {
+  kind: 'multi'
+  prompt?: string
+  /** Options shared by every row, always in this order (e.g. a e i o u) */
+  options?: string[]
+  rows: MultiRow[]
+}
+
+export type ItemInput =
+  | ChoiceItem
+  | MatchItem
+  | WriteItem
+  | PredictItem
+  | SelectItem
+  | OrderItem
+  | MultiItem
 export type Item = ItemInput & { id: string }
 
 export interface PartInput {

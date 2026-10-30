@@ -1,6 +1,6 @@
 import { defineSection } from '../../../components/quiz/types'
-import type { ChoiceItem, ItemInput, PartInput } from '../../../components/quiz/types'
-import { choice, matches, order, select, write, yesNo } from '../helpers'
+import type { ChoiceItem, ItemInput, MultiItem, PartInput } from '../../../components/quiz/types'
+import { choice, order, select, write, yesNo } from '../helpers'
 
 // ---------------------------------------------------------------------------
 // Shared builders
@@ -155,13 +155,12 @@ const nounKinds: ItemInput[] = [
   nounKind('park', 'a place'),
 ]
 
-/** The answer is the picture's name, so 🔊 is off and the name is not read aloud. */
-const pictureNoun = (picture: string, answer: string, others: string[]) =>
-  choice('Tap the noun that matches the picture.', answer, others, {
-    picture,
-    noSpeak: true,
-    reveal: `${picture} ${answer}`,
-  })
+/**
+ * "Which word is a noun / verb / adjective?" — the other options are the other kinds, so
+ * the child has to know what the kind means (not just what the picture shows).
+ */
+const whichIs = (k: WordKind, answer: string, others: [string, string]) =>
+  choice(`Which word is ${k === 'adjective' ? 'an' : 'a'} ${k}?`, answer, others)
 
 export const grammarFind = defineSection({
   id: 'grammar-find',
@@ -189,35 +188,24 @@ export const grammarFind = defineSection({
       columns: 2,
     }),
     {
-      source: 'myGrammar p.2, 5',
-      title: 'Look at the picture. Tap the noun that matches it.',
+      // The words of the picture activities (p.2, 5 nouns; p.6 verbs; p.14 adjectives)
+      source: 'myGrammar p.2, 5, 6, 14',
+      title:
+        'Which word is it? A noun names a person, place, animal, or thing. A verb is an action word. An adjective tells more about a noun.',
       columns: 2,
       items: [
-        pictureNoun('🐶', 'dog', ['jump']),
-        pictureNoun('🏫', 'school', ['run', 'jump', 'play']),
-        pictureNoun('👧', 'girl', ['run']),
-        pictureNoun('🐦', 'bird', ['sing', 'dog', 'swim']),
-        pictureNoun('🏫', 'school', ['banana']),
-        pictureNoun('🍎', 'apple', ['red', 'eat', 'banana']),
-        pictureNoun('👧', 'girl', ['mom', 'happy', 'dad']),
-      ],
-    },
-    {
-      source: 'myGrammar p.6, 14',
-      title: 'Match the word to the picture.',
-      items: [
-        ...matches({
-          '🛝 a girl on a swing': 'swing',
-          '👋 a girl waving her hand': 'wave',
-          '🚴 a boy on his bike': 'ride',
-          '🐕 a dog making a hole in the dirt': 'dig',
-        }),
-        ...matches({
-          '🌳 a tree, up to the sky': 'tall',
-          '🚚 a huge truck': 'big',
-          '😄 a smiling girl, jumping': 'happy',
-          '🐞 a little ladybug': 'tiny',
-        }),
+        whichIs('noun', 'dog', ['jump', 'happy']),
+        whichIs('verb', 'wave', ['hand', 'happy']),
+        whichIs('adjective', 'tall', ['tree', 'grow']),
+        whichIs('noun', 'school', ['run', 'big']),
+        whichIs('verb', 'ride', ['bike', 'red']),
+        whichIs('adjective', 'big', ['truck', 'drive']),
+        whichIs('noun', 'girl', ['sing', 'little']),
+        whichIs('verb', 'dig', ['dog', 'dirty']),
+        whichIs('adjective', 'happy', ['girl', 'jump']),
+        whichIs('noun', 'apple', ['eat', 'red']),
+        whichIs('adjective', 'tiny', ['ladybug', 'crawl']),
+        whichIs('noun', 'bird', ['swim', 'blue']),
       ],
     },
     {
@@ -251,17 +239,11 @@ export const grammarFind = defineSection({
 
 const useItems: ItemInput[] = [
   article('orange', 'an'), // p.14 act 3
-  choice('Mia ___ the ball in school.', 'kicks', ['kick']), // p.9 C
   choice('The ___ likes to go to school.', 'girl', ['playground', 'bike']), // p.3 act 1
   choice('We walk past the ___ apartment building.', 'tall', ['happy', 'three']), // p.15 act 2
   article('eagle', 'an'), // p.16 A
   choice('The kids ___ at the park after school.', 'play', ['shop']), // p.7 act 2
-  choice('Which noun names the picture?', 'backpack', ['pencil', 'crayon'], {
-    picture: '🎒',
-    noSpeak: true,
-  }), // p.5 ④
   article('park', 'a'), // p.14
-  choice('The girl ___ a picture every day.', 'draws', ['draw']), // p.9 C
   choice('We play at the ___ after school.', 'playground', ['cat', 'girl']), // p.3
   article('chair', 'a'), // p.16
   choice('The ___ girl waves to her friends.', 'happy', ['three', 'green']), // p.15
@@ -271,38 +253,20 @@ const useItems: ItemInput[] = [
     picture: '👦👧',
     fills: ['boy', 'girl'],
   }), // p.4 ②
-  choice('The students ___ at their desks.', 'sit', ['sits']), // p.9 C
   article('lamp', 'a'), // p.16
-  choice('Which noun names the picture?', 'fox', ['dog', 'cat'], {
-    picture: '🦊',
-    noSpeak: true,
-  }), // p.5
   choice('Dad ___ his bike to work in the morning.', 'rides', ['waves']), // p.7
   article('tiny bug', 'a'), // p.14
   choice('My dad drives a ___ car.', 'red', ['happy', 'tall']), // p.15
   choice('The ___ sleeps on my bed every day.', 'cat', ['playground', 'bike']), // p.3
-  choice('Ben ___ over the puddle.', 'jumps', ['jump']), // p.9 C
   article('elephant', 'an'), // p.16
-  choice(
-    'The picture shows a building full of books you can borrow. Which noun names it?',
-    'library',
-    ['school', 'store'],
-  ), // p.5
   choice('We ___ our bikes.', 'ride', ['stops', 'play']), // p.11
   article('girl', 'a'), // p.14
   choice('I can ride a ___ on my street.', 'bike', ['playground', 'cat']), // p.3
-  choice('I ___ to the funny story.', 'listen', ['listens']), // p.9 C
   article('flower', 'a'), // p.16
   choice('I see a ___ bug on the flower.', 'tiny', ['tall', 'three']), // p.15
   article('octopus', 'an'), // p.16
   choice('I saw a dog ___ along the street by my house.', 'run', ['push']), // p.7
   article('blue bag', 'a'), // p.14
-  choice('Which noun names the picture?', 'banana', ['apple', 'peach'], {
-    picture: '🍌',
-    noSpeak: true,
-  }), // p.5
-  article('umbrella', 'an'), // p.16
-  choice('The children ___ a yummy cake.', 'eat', ['eats']), // p.9 C
   article('carrot', 'a'), // p.16
 ]
 
@@ -315,7 +279,7 @@ export const grammarUse = defineSection({
   parts: [
     ...chunk(useItems, 8, {
       source: 'myGrammar p.3–5, 7, 9, 11, 14–16',
-      title: 'Choose the word that fits. Is it a noun, a verb, a or an, or an adjective?',
+      title: 'Choose the word that fits the sentence.',
       columns: 2,
     }),
     {
@@ -360,6 +324,48 @@ export const grammarUse = defineSection({
           { lines: 4 },
         ),
         write('Draw your noun and use at least 3 adjectives.', undefined, { draw: true }),
+      ],
+    },
+  ],
+})
+
+// ---------------------------------------------------------------------------
+// Verb + s — the same verb twice (kick / kicks); pick the one that fits the naming part
+// ---------------------------------------------------------------------------
+
+/** Three sentences; each row offers the verb without and with -s. */
+const verbS = (...rows: [sentence: string, verb: string, withS: boolean][]): MultiItem => ({
+  kind: 'multi',
+  rows: rows.map(([prompt, verb, withS]) => ({
+    prompt,
+    options: [verb, `${verb}s`],
+    answer: withS ? `${verb}s` : verb,
+  })),
+})
+
+export const verbPlusS = defineSection({
+  id: 'verb-s',
+  title: 'Verb + s',
+  subtitle: 'Mia kicks · They kick',
+  emoji: '🦶',
+  group: 'Grammar',
+  parts: [
+    {
+      // p.9 C sentences first, then the verbs of p.7, 9, 11–13 in new sentences
+      source: 'myGrammar p.7, 9, 11–13',
+      title:
+        'Which verb fits? One person, animal, or thing (he, she, it, Mia, the dog) → add -s: Mia kicks. I, you, we, they, or more than one → no -s: They kick.',
+      items: [
+        verbS(['Mia ___ the ball in school.', 'kick', true], ['The students ___ at their desks.', 'sit', false], ['The girl ___ a picture every day.', 'draw', true]),
+        verbS(['Ben ___ over the puddle.', 'jump', true], ['I ___ to the funny story.', 'listen', false], ['The children ___ a yummy cake.', 'eat', false]),
+        verbS(['He ___ a room.', 'clean', true], ['They ___ books.', 'read', false], ['Tom ___ to school.', 'walk', true]),
+        verbS(['The dog ___ fast.', 'run', true], ['The dogs ___ fast.', 'run', false], ['We ___ in the park.', 'play', false]),
+        verbS(['Mom ___ at the store.', 'shop', true], ['The kids ___ in the sand.', 'play', false], ['The bus ___ at the corner.', 'stop', true]),
+        verbS(['You ___ a bike.', 'ride', false], ['Henry ___ his bike.', 'ride', true], ['We ___ to our teacher.', 'listen', false]),
+        verbS(['A bird ___ in the tree.', 'sing', true], ['Birds ___ in the tree.', 'sing', false], ['She ___ to her friends.', 'wave', true]),
+        verbS(['My brother ___ up early.', 'wake', true], ['I ___ the flowers.', 'water', false], ['Dad ___ dinner for our family.', 'cook', true]),
+        verbS(['The cat ___ on my bed.', 'sleep', true], ['They ___ to school.', 'walk', false], ['It ___ a lot in spring.', 'rain', true]),
+        verbS(['Sam ___ a book.', 'read', true], ['We ___ our bikes.', 'ride', false], ['The teacher ___ a dress.', 'wear', true]),
       ],
     },
   ],
