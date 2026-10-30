@@ -55,7 +55,7 @@ Wordlist note: the study guide's "U1W1 / U1W2 / U1W5 Wordlist" is the vocabulary
 |---|---|---|
 | Foundational | Short vowels (`vowels`) | 🔊 "which vowel is in the middle?" (3 words per question, a e i o u), 🔊 tap the word you hear, picture/clue words, word ↔ picture matches — words from all five short-vowel units (myView p.13–210, Phonics p.2–21) |
 | Foundational | Letters & sounds (`letters`) | 🔊 beginning / ending letter (m s t c p n f b g d l h r w j k qu v y z mixed), 🔊 endings (_ug/_un/_ut, -it/-ill), sentences with letters missing (read, only one choice makes sense), ABC order |
-| Foundational | Spelling & writing (`spelling`) | 🔊 dictation of the units' spelling words, sentences to write (all handwriting) |
+| Foundational | Spelling & writing (`spelling`) | 🔊 tap the right spelling (3 words per question; wrong ones are likely misspellings: *kat*, *mit*, *sunn*), and handwriting: 🔊 dictation of the units' spelling words, sentences to write |
 | Foundational | My Words to Know (`words`) | myView p.40, 88, 126, 170, 206, 227 + the *Words to Know* halves of the spelling pages (p.85, 123, 167, 204, 225); Phonics p.4, 8, 12, 16, 20, 24 |
 | Vocabulary | The Blackout words (`vocab-blackout`) | IT LAW p.4–5, 8–9 |
 | Vocabulary | Henry on Wheels words (`vocab-henry`) | IT LAW p.12–13, 16–17 |
@@ -126,7 +126,7 @@ src/exams/grade-1-midterm-1/
 
 ## Status
 - [x] Spec
-- [x] IT question banks — 10 sections; mixed-test pool 162 tap questions + 45 handwriting
+- [x] IT question banks — 10 sections; mixed-test pool 170 tap questions + 45 handwriting
 - [x] LT question banks — 12 sections; mixed-test pool 200 tap questions + 24 handwriting
 - Trimmed on parent's request: oral-only pages (156 items), added dictation (12), grammar word-kind items not from the book's circling lists and repeated sentences (~60), Skill Words section (20), questions made from teaching text (myView p.42, 48, 104–105, 142–143).
 - Oct 31 review: phonics regrouped by skill (short a/e/i/o/u + qu sections → Short vowels / Letters & sounds / Spelling & writing; 327 → 162 tap questions in the IT pool), give-away items fixed or dropped (see Ground rules), story-bound vocab moved to the stories, added Verb + s and safe · safely · safety.
